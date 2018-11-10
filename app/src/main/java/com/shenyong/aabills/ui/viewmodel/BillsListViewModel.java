@@ -1,4 +1,4 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui.viewmodel;
 
 import com.sddy.utils.TimeUtils;
 import com.shenyong.aabills.listdata.BillRecordData;

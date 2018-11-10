@@ -1,4 +1,4 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui.viewmodel;
 
 import android.annotation.SuppressLint;
 
@@ -29,9 +29,9 @@ import io.reactivex.schedulers.Schedulers;
 public class StatisticViewModel {
 
     public class StatData {
-        List<StatisticTypeData> mTypesData;
-        List<UserCostData> mCostData;
-        double mAvgCost;
+        public List<StatisticTypeData> mTypesData;
+        public List<UserCostData> mCostData;
+        public double mAvgCost;
     }
 
     public interface LoadStatsticsCallback {

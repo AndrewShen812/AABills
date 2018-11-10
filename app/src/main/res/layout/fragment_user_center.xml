@@ -6,7 +6,7 @@
     <data>
         <variable
             name="presenter"
-            type="com.shenyong.aabills.UserCenterFragment" />
+            type="com.shenyong.aabills.ui.UserCenterFragment" />
     </data>
 
     <android.support.constraint.ConstraintLayout

@@ -224,6 +224,11 @@ public class BaseActivity extends AppCompatActivity implements Presenter{
         startActivity(intent);
     }
 
+    public void startActivityForResult(Class<? extends Activity> activity, int reqCode) {
+        Intent intent = new Intent(this, activity);
+        startActivityForResult(intent, reqCode);
+    }
+
     protected void setOnClicklistener(View... views) {
         if (ArrayUtils.isEmpty(views)) {
             return;

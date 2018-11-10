@@ -1,4 +1,4 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui;
 
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -6,6 +6,7 @@ import android.view.View;
 
 import com.sddy.baseui.BaseBindingActivity;
 import com.sddy.utils.ViewUtils;
+import com.shenyong.aabills.R;
 import com.shenyong.aabills.databinding.ActivityHeadSettingBinding;
 import com.shenyong.aabills.utils.DrawableUtils;
 

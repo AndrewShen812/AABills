@@ -19,6 +19,9 @@
         <item>物业费</item>
         <item>调味品</item>
         <item>日用品</item>
+        <item>干货食材</item>
+        <item>日用品</item>
+        <item>日用品</item>
     </string-array>
     <string name="add_bill_total_amount">总消费金额</string>
     <string name="add_bill_date">消费日期</string>

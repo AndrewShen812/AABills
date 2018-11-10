@@ -4,6 +4,19 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
+apply plugin: 'com.mob.sdk'
+
+MobSDK {
+    appKey "2864ae0033733"
+    appSecret "d134839883b5b1085615f36c3e014b65"
+
+    SMSSDK {
+        gui false
+    }
+}
+
 android {
     signingConfigs {
         debug {
@@ -35,14 +48,29 @@ android {
     }
 }
 
+kapt {
+    generateStubs = true
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':base-ui')
     implementation deps.room.runtime
     implementation deps.room.rxjava2
     annotationProcessor deps.room.compiler
+    kapt deps.room.compiler
+    implementation deps.lifecycle.extensions
+    annotationProcessor deps.lifecycle.compiler
+    kapt deps.lifecycle.compiler
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
     implementation 'com.contrarywind:Android-PickerView:4.1.6'
-    implementation 'com.contrarywind:wheelview:4.0.8'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    kapt "com.android.databinding:compiler:$android_gradle_version"
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
+    //    implementation 'cn.pedant.sweetalert:library:1.3'
+    implementation 'com.alibaba:fastjson:1.2.51'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
 }

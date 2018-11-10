@@ -1,4 +1,4 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui;
 
 import android.os.Bundle;
 import android.view.View;
@@ -9,9 +9,10 @@ import com.sddy.baseui.dialog.DialogFactory;
 import com.sddy.baseui.dialog.MsgDialog;
 import com.sddy.baseui.dialog.MsgToast;
 import com.sddy.baseui.recycler.IItemClickLisntener;
-import com.sddy.baseui.recycler.databinding.SimpleBindingAdapter;
+import com.shenyong.aabills.R;
 import com.shenyong.aabills.listdata.BillRecordData;
 import com.shenyong.aabills.room.BillsDataSource;
+import com.shenyong.aabills.ui.viewmodel.BillsListViewModel;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui;
 
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -8,16 +8,13 @@ import android.view.View;
 
 import com.sddy.baseui.BaseActivity;
 import com.sddy.baseui.BaseBindingActivity;
-import com.sddy.baseui.recycler.BaseHolderData;
 import com.sddy.baseui.recycler.DefaultItemDivider;
 import com.sddy.baseui.recycler.databinding.SimpleBindingAdapter;
 import com.sddy.utils.ViewUtils;
+import com.shenyong.aabills.R;
 import com.shenyong.aabills.databinding.ActivityStatisticDetailBinding;
 import com.shenyong.aabills.listdata.StatisticTypeData;
-import com.shenyong.aabills.listdata.UserCostData;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.shenyong.aabills.ui.viewmodel.StatisticViewModel;
 
 public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatisticDetailBinding> {
 

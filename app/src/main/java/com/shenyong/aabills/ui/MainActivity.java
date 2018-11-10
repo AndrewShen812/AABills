@@ -1,14 +1,14 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 
 import com.sddy.baseui.BaseActivity;
 import com.sddy.baseui.BaseFragment;
+import com.shenyong.aabills.R;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -37,6 +37,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         super.onResume();
         showFragment(mCurrentFragment);
     }
+
+    private static final int CODE_SUCCESS = 1000;
 
     private void showFragment(BaseFragment fragment) {
         if (fragment == null || fragment.isVisible()) {

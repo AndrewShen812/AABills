@@ -1,10 +1,9 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui;
 
 import android.app.DatePickerDialog;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.text.TextUtils;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.sddy.baseui.BaseBindingFragment;
-import com.sddy.baseui.dialog.MsgDialog;
 import com.sddy.baseui.dialog.MsgToast;
 import com.sddy.baseui.recycler.DefaultItemDivider;
 import com.sddy.baseui.recycler.IItemClickLisntener;
@@ -22,6 +20,7 @@ import com.sddy.utils.DimenUtils;
 import com.sddy.utils.TimeUtils;
 import com.sddy.utils.ViewUtils;
 import com.sddy.utils.log.Log;
+import com.shenyong.aabills.R;
 import com.shenyong.aabills.databinding.FragmentAddBillBinding;
 import com.shenyong.aabills.listdata.BillTypeData;
 import com.shenyong.aabills.room.BillDatabase;
@@ -30,16 +29,13 @@ import com.shenyong.aabills.room.User;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import io.reactivex.Emitter;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 

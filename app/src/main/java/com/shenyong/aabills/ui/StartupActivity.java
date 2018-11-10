@@ -1,9 +1,10 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.sddy.baseui.BaseActivity;
+import com.shenyong.aabills.R;
+import com.shenyong.aabills.ui.user.UserLoginActivity;
 
 public class StartupActivity extends BaseActivity {
 
@@ -20,7 +21,7 @@ public class StartupActivity extends BaseActivity {
         findViewById(R.id.ll_start_up_name).postDelayed(new Runnable() {
             @Override
             public void run() {
-                startActivity(MainActivity.class);
+                startActivity(UserLoginActivity.class);
                 finish();
             }
         }, 2000);

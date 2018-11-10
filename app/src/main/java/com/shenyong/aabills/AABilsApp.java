@@ -1,5 +1,6 @@
 package com.shenyong.aabills;
 
+import com.mob.MobSDK;
 import com.sddy.baseui.BaseApplication;
 import com.sddy.utils.log.Log;
 import com.sddy.utils.log.Logger;
@@ -22,6 +23,7 @@ public class AABilsApp extends BaseApplication {
     public void onCreate() {
         super.onCreate();
 
+        MobSDK.init(this);
         prepareUsers();
     }
 

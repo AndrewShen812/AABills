@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.shenyong.aabills">
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".AABilsApp"
@@ -9,18 +12,23 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".StartupActivity">
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
+        <activity android:name=".ui.StartupActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".HeadSettingActivity" />
-        <activity android:name=".StatisticDetailActivity"></activity>
-        <activity android:name=".BillsListActivity"></activity>
+        <activity
+            android:name=".ui.MainActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".ui.HeadSettingActivity" />
+        <activity android:name=".ui.StatisticDetailActivity" />
+        <activity android:name=".ui.BillsListActivity" />
+        <activity android:name=".ui.user.UserLoginActivity" />
+        <activity android:name=".ui.user.UserRegActivity"></activity>
     </application>
 
 </manifest>

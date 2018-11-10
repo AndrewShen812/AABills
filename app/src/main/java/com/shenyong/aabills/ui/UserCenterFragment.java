@@ -1,17 +1,16 @@
-package com.shenyong.aabills;
+package com.shenyong.aabills.ui;
 
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 
 import com.sddy.baseui.BaseBindingFragment;
-import com.sddy.baseui.dialog.DialogFactory;
 import com.sddy.baseui.dialog.MsgDialog;
 import com.sddy.baseui.dialog.MsgToast;
 import com.sddy.utils.DimenUtils;
 import com.sddy.utils.ViewUtils;
+import com.shenyong.aabills.R;
 import com.shenyong.aabills.databinding.FragmentUserCenterBinding;
 
 public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBinding> {
