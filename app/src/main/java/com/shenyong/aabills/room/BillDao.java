@@ -25,6 +25,6 @@ public interface BillDao {
     List<BillRecord> getBills(long startTime, long endTime);
 
     @Query("select * from bill_record where mId = :billId")
-    BillRecord queryBill(int billId);
+    BillRecord queryBill(String billId);
 
 }

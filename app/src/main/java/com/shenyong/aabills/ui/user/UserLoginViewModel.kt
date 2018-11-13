@@ -8,10 +8,13 @@ import com.shenyong.aabills.api.API
 import com.shenyong.aabills.api.bean.LoginResult
 import com.shenyong.aabills.api.bean.MobResponse
 import com.shenyong.aabills.api.MobService
+import com.shenyong.aabills.room.BillDatabase
+import com.shenyong.aabills.room.User
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.util.function.Function
 
 /**
  *
@@ -28,6 +31,16 @@ class UserLoginViewModel : ViewModel() {
         val phone = phoneText.value ?: ""
         val pwd = pwdText.value ?: ""
         API.mobApi.login(MobService.LOGIN, MobService.KEY, phone, pwd)
+                .map {
+                    if (it.isSuccess() && it.result != null) {
+                        val user = User("")
+                        user.mPhone = phone
+                        user.mPwd = pwd
+                        user.mUid = it.result?.uid ?: ""
+                        BillDatabase.getInstance().userDao().insertUser(user)
+                    }
+                    return@map it
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<MobResponse<LoginResult>> {
@@ -41,10 +54,10 @@ class UserLoginViewModel : ViewModel() {
                         loginSuccess.value = t.isSuccess()
                         if (t.isSuccess() && t.result != null) {
                             UserManager.user.isLogin = true
-                            UserManager.user.phone = phone
-                            UserManager.user.pwd = pwd
-                            UserManager.user.uid = t.result?.uid ?: ""
-                            UserManager.user.token = t.result?.token ?: ""
+                            UserManager.user.mPhone = phone
+                            UserManager.user.mPwd = pwd
+                            UserManager.user.mUid = t.result?.uid ?: ""
+                            UserManager.user.mToken = t.result?.token ?: ""
                         }
                         if (!t.isSuccess() && t.hasMsg()) {
                             MsgToast.shortToast(t.msg)

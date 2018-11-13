@@ -48,7 +48,7 @@ public class BillRepository {
         return mInstance;
     }
 
-    public User getUserBlocked(int userId) {
+    public User getUserBlocked(String userId) {
         return mUserDao.queryUser(userId);
     }
 
@@ -174,7 +174,7 @@ public class BillRepository {
             });
     }
 
-    public void deleteBill(final int billId, final BillsDataSource.DelBillCallback callback) {
+    public void deleteBill(final String billId, final BillsDataSource.DelBillCallback callback) {
         Observable.create(new ObservableOnSubscribe<String>() {
                 @Override
                 public void subscribe(ObservableEmitter<String> emitter) throws Exception {

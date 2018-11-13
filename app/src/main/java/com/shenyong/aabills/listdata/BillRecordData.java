@@ -7,7 +7,7 @@ import com.shenyong.aabills.databinding.LayoutBillRecordItemBinding;
 
 public class BillRecordData extends BaseHolderData<BaseBindingHolder<LayoutBillRecordItemBinding>> {
 
-    public int mRecordId;
+    public String mRecordId;
 
     public String mTime;
     public String mType;

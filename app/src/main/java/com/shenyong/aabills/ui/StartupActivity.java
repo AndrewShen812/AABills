@@ -21,7 +21,7 @@ public class StartupActivity extends BaseActivity {
         findViewById(R.id.ll_start_up_name).postDelayed(new Runnable() {
             @Override
             public void run() {
-                startActivity(UserLoginActivity.class);
+                startActivity(MainActivity.class);
                 finish();
             }
         }, 2000);

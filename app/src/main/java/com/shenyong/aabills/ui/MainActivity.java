@@ -1,14 +1,22 @@
 package com.shenyong.aabills.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 
 import com.sddy.baseui.BaseActivity;
 import com.sddy.baseui.BaseFragment;
+import com.sddy.baseui.dialog.MsgToast;
+import com.shenyong.aabills.AABilsApp;
 import com.shenyong.aabills.R;
+import com.shenyong.aabills.ui.user.UserCenterFragment;
+import com.shenyong.aabills.ui.viewmodel.MainViewModel;
+
+import io.reactivex.functions.Consumer;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -17,6 +25,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private BaseFragment mUserCenterFragment;
 
     private BaseFragment mCurrentFragment;
+
+    private MainViewModel mViewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,6 +40,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         mStatisticFragment = StatisticFragment.newInstance();
         mUserCenterFragment = UserCenterFragment.newInstance();
         mCurrentFragment = mAddBillFragment;
+        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
     }
 
     @Override
@@ -73,4 +84,25 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         return false;
     }
 
+    private long mLastBack = 0;
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            long current = System.currentTimeMillis();
+            if (current - mLastBack > 2000) {
+                mLastBack = current;
+                MsgToast.shortToast("再按一次退出AA账单");
+                return true;
+            }
+            // 保存登录信息
+            mViewModel.saveLoginUser(new Consumer<String>() {
+                @Override
+                public void accept(String s) throws Exception {
+                    AABilsApp.getInstance().exitApp();
+                }
+            });
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }

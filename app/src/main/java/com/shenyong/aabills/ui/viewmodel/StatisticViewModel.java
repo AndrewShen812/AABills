@@ -3,6 +3,10 @@ package com.shenyong.aabills.ui.viewmodel;
 import android.annotation.SuppressLint;
 
 import com.sddy.utils.ArrayUtils;
+import com.shenyong.aabills.api.API;
+import com.shenyong.aabills.api.MobService;
+import com.shenyong.aabills.api.bean.LoginResult;
+import com.shenyong.aabills.api.bean.MobResponse;
 import com.shenyong.aabills.listdata.StatisticTypeData;
 import com.shenyong.aabills.listdata.UserCostData;
 import com.shenyong.aabills.room.BillDatabase;
@@ -24,6 +28,7 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 public class StatisticViewModel {
@@ -93,11 +98,11 @@ public class StatisticViewModel {
             total += bill.mAmount;
             type.mAmount += bill.mAmount;
             // 按用户计算
-            UserCostData cost = costMap.get(bill.mUserId + "");
+            UserCostData cost = costMap.get(bill.mUid + "");
             if (cost == null) {
                 cost = new UserCostData();
-                costMap.put(bill.mUserId + "", cost);
-                User user = userDao.queryUser(bill.mUserId);
+                costMap.put(bill.mUid, cost);
+                User user = userDao.findLocalUser(bill.mUid);
                 cost.mName = user.mName;
             }
             cost.mCost += bill.mAmount;

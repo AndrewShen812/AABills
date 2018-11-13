@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.shenyong.aabills">
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -24,11 +25,14 @@
         <activity
             android:name=".ui.MainActivity"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".ui.HeadSettingActivity" />
+        <activity android:name=".ui.user.HeadSettingActivity" />
         <activity android:name=".ui.StatisticDetailActivity" />
         <activity android:name=".ui.BillsListActivity" />
         <activity android:name=".ui.user.UserLoginActivity" />
         <activity android:name=".ui.user.UserRegActivity"></activity>
+
+        <service android:name=".SyncBillsService"
+            android:exported="false"/>
     </application>
 
 </manifest>

@@ -20,6 +20,8 @@ interface MobService {
         const val BASE_URL = "http://apicloud.mob.com/user/"
         const val REG = "rigister"
         const val LOGIN = "login"
+        const val PUT_PROFILE = "profile/put"
+        const val get_PROFILE = "profile/query"
         const val CHANGE_PWD = /*BASE_URL + */"password/change"
     }
 
@@ -35,4 +37,18 @@ interface MobService {
                    @Query("key") key: String,
                    @Query("username") phone: String,
                    @Query("password") pwd: String): Observable<MobResponse<LoginResult>>
+
+    @GET
+    open fun setUserProfile(@Url url: String,
+                            @Query("key") key: String,
+                            @Query("token") token: String,
+                            @Query("uid") uid: String,
+                            @Query("item") item: String,
+                            @Query("value") value: String): Observable<MobResponse<String>>
+
+    @GET
+    open fun getUserProfile(@Url url: String,
+                            @Query("key") key: String,
+                            @Query("uid") uid: String,
+                            @Query("item") item: String): Observable<MobResponse<String>>
 }

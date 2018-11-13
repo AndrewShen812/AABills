@@ -40,12 +40,12 @@ public class BillsListViewModel {
                 Observable.create(new ObservableOnSubscribe<BillRecordData>() {
                     @Override
                     public void subscribe(ObservableEmitter<BillRecordData> emitter) throws Exception {
-                        Map<Integer, User> userMap = new HashMap<>();
+                        Map<String, User> userMap = new HashMap<>();
                         for (BillRecord bill : bills) {
-                            User user = userMap.get(bill.mUserId);
+                            User user = userMap.get(bill.mUid);
                             if (user == null) {
-                                user = mRepository.getUserBlocked(bill.mUserId);
-                                userMap.put(bill.mUserId, user);
+                                user = mRepository.getUserBlocked(bill.mUid);
+                                userMap.put(bill.mUid, user);
                             }
                             BillRecordData data = new BillRecordData();
                             data.mTime = TimeUtils.getTimeString(bill.mTimestamp, "yyyy年MM月dd日")

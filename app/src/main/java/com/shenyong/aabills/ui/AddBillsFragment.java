@@ -88,18 +88,18 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 switch (checkedId) {
-                    case R.id.rb_add_bill_user_sy:
-                        mBill.mUserId = findUser("申勇").mId;
-                        break;
-                    case R.id.rb_add_bill_user_ty:
-                        mBill.mUserId = findUser("廷玉").mId;
-                        break;
-                    case R.id.rb_add_bill_user_qy:
-                        mBill.mUserId = findUser("漆英").mId;
-                        break;
-                    case R.id.rb_add_bill_user_sl:
-                        mBill.mUserId = findUser("世麟").mId;
-                        break;
+//                    case R.id.rb_add_bill_user_sy:
+//                        mBill.mUid = findUser("申勇").mId;
+//                        break;
+//                    case R.id.rb_add_bill_user_ty:
+//                        mBill.mUid = findUser("廷玉").mId;
+//                        break;
+//                    case R.id.rb_add_bill_user_qy:
+//                        mBill.mUid = findUser("漆英").mId;
+//                        break;
+//                    case R.id.rb_add_bill_user_sl:
+//                        mBill.mUid = findUser("世麟").mId;
+//                        break;
                     default:
                         break;
                 }
@@ -212,14 +212,15 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
             MsgToast.shortToast("请选择日期");
             return;
         }
-        if (mBill.mUserId == 0) {
-            MsgToast.shortToast("请选择垫付人");
-            return;
-        }
+//        if (mBill.mUserId == 0) {
+//            MsgToast.shortToast("请选择垫付人");
+//            return;
+//        }
         Observable.generate(new Consumer<Emitter<String>>() {
                     @Override
                     public void accept(Emitter<String> emitter) {
                         try {
+                            mBill.generateId();
                             BillDatabase.getInstance().billDao().insertBill(mBill);
                             emitter.onNext("OK");
                         } catch (Exception e) {

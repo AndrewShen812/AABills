@@ -2,6 +2,7 @@ package com.shenyong.aabills.room;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 @Dao
 public interface UserDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertUser(User user);
 
     @Insert
@@ -18,8 +19,11 @@ public interface UserDao {
     @Query("select * from user where mName = :name")
     User queryUser(String name);
 
-    @Query("select * from user where mId = :id")
-    User queryUser(int id);
+    @Query("select * from user where mUid = :id")
+    User findLocalUser(String id);
+
+    @Query("select * from user where isLastLogin = 1 limit 1")
+    User findLastLoginUser();
 
     @Query("select * from user")
     List<User> queryAllUsers();
