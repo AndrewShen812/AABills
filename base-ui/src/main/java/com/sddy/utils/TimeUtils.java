@@ -20,10 +20,46 @@ public class TimeUtils {
         return sdf.format(new Date());
     }
 
+    /**
+     * 获取指定格式的日期字符串
+     * @param date 日期
+     * @param pattern 日期格式
+     * @return 日期字符串
+     */
+    public static String getDateString(Date date, String pattern) {
+        pattern = TextUtils.isEmpty(pattern) ? PATTERN_TIME : pattern;
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.getDefault());
+        return sdf.format(date);
+    }
+
+    /**
+     * 获取默认格式的日期字符串，日期默认格式：yyyy-MM-dd
+     * @param date 日期
+     * @return 日期字符串
+     */
+    public static String getDateString(Date date) {
+        return getDateString(date, PATTERN_DATE);
+    }
+
+    /**
+     * 获取指定格式的时间字符串
+     * @param timestamp 时间戳
+     * @param pattern 时间格式
+     * @return 时间字符串
+     */
     public static String getTimeString(long timestamp, String pattern) {
         pattern = TextUtils.isEmpty(pattern) ? PATTERN_TIME : pattern;
         SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.getDefault());
         return sdf.format(new Date(timestamp));
+    }
+
+    /**
+     * 获取默认格式的时间字符串，时间默认格式：yyyy-MM-dd HH:mm:ss
+     * @param timestamp 时间戳
+     * @return 时间字符串
+     */
+    public static String getTimeString(long timestamp) {
+        return getTimeString(timestamp, PATTERN_TIME);
     }
 
     public static int getYear() {

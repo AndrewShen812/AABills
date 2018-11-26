@@ -27,5 +27,11 @@ public interface UserDao {
 
     @Query("select * from user")
     List<User> queryAllUsers();
+
+    @Query("select * from sync_record where mMyUid = :myUid and mLANUid = :lanUid")
+    UserSyncRecord getSyncRecord(String myUid, String lanUid);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void updateSyncRecord(UserSyncRecord record);
 }
 

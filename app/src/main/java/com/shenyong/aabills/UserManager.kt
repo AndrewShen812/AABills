@@ -65,7 +65,8 @@ class UserManager {
                     }
 
                     override fun onNext(t: User) {
-                        MsgToast.shortToast("登录成功");
+                        MsgToast.shortToast("登录成功")
+                        SyncBillsService.startService()
                         user = t
                     }
 

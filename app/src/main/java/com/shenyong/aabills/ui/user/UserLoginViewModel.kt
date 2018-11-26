@@ -3,6 +3,7 @@ package com.shenyong.aabills.ui.user
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.sddy.baseui.dialog.MsgToast
+import com.shenyong.aabills.SyncBillsService
 import com.shenyong.aabills.UserManager
 import com.shenyong.aabills.api.API
 import com.shenyong.aabills.api.bean.LoginResult
@@ -58,6 +59,7 @@ class UserLoginViewModel : ViewModel() {
                             UserManager.user.mPwd = pwd
                             UserManager.user.mUid = t.result?.uid ?: ""
                             UserManager.user.mToken = t.result?.token ?: ""
+                            SyncBillsService.startService()
                         }
                         if (!t.isSuccess() && t.hasMsg()) {
                             MsgToast.shortToast(t.msg)
