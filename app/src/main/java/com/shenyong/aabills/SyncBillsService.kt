@@ -1,30 +1,32 @@
 package com.shenyong.aabills
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.net.wifi.WifiManager
 import android.os.IBinder
 import com.alibaba.fastjson.JSON
 import com.sddy.utils.log.Log
-import com.shenyong.aabills.UserManager.Companion.user
+import com.shenyong.aabills.UserManager.user
+import com.shenyong.aabills.api.AAObserver
 import com.shenyong.aabills.room.BillDatabase
 import com.shenyong.aabills.room.BillRecord
 import com.shenyong.aabills.room.UserSyncRecord
 import com.shenyong.aabills.sync.AAPacket
-import com.shenyong.aabills.utils.AppExecutors
 import com.shenyong.aabills.utils.RxTimer
 import com.shenyong.aabills.utils.WifiUtils
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
-import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.io.IOException
 import java.net.DatagramPacket
+import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.MulticastSocket
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.stream.Collectors
+
 
 /**
  * Author: sheny
@@ -34,14 +36,16 @@ class SyncBillsService : Service() {
 
     private var mSendTask: Disposable? = null
     private var mRecvTask: Disposable? = null
-    private var mSendSocket: MulticastSocket? = null
+    private var mUdpSocket: MulticastSocket? = null
     private var mRecvSocket: MulticastSocket? = null
     private val mSendQueue = LinkedBlockingQueue<ByteArray>(100)
     private val mSyncTimer = RxTimer()
     private lateinit var mBroadcastAddress: InetAddress
     private var mMyIp: String = ""
+    private var mMulticastLock: WifiManager.MulticastLock? = null
 
     companion object {
+        private const val SEND_PORT = 10085
         private const val PORT = 10086
         private const val PACK_PREFIX = "aabillsSync"
 
@@ -62,7 +66,6 @@ class SyncBillsService : Service() {
 
     private fun enqueueData(packet: AAPacket, blocking: Boolean) {
         val data = "${PACK_PREFIX}_${packet.toJSONString()}".toByteArray()
-        Log.Http.d("加入发送队列：${String(data)}")
         if (blocking) {
             mSendQueue.put(data)
         } else {
@@ -86,12 +89,22 @@ class SyncBillsService : Service() {
             stopSelf()
             return
         }
-//        mBroadcastAddress = WifiUtils.getBroadcastAddress(this)
-        mBroadcastAddress = InetAddress.getByName("255.255.255.255")
+        val manager = this.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        mMulticastLock = manager.createMulticastLock("AABills Sync")
+        mMulticastLock?.acquire()
         try {
-            mSendSocket = MulticastSocket()
-            mSendSocket!!.broadcast = true
+//            mBroadcastAddress = WifiUtils.getBroadcastAddress(this)
+            mBroadcastAddress = InetAddress.getByName("239.255.255.250")
+            mUdpSocket = MulticastSocket(PORT)
+//            mUdpSocket = DatagramSocket()
+            //设置本MulticastSocket发送的数据报被回送到自身
+            mUdpSocket?.loopbackMode = false
+            mUdpSocket?.reuseAddress = true
+//            mUdpSocket?.broadcast = true
+            mUdpSocket!!.joinGroup(mBroadcastAddress)
             mRecvSocket = MulticastSocket(PORT)
+//            mRecvSocket?.broadcast = true
+            mRecvSocket!!.joinGroup(mBroadcastAddress)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -101,9 +114,9 @@ class SyncBillsService : Service() {
             while (true) {
                 val data = mSendQueue.poll()
                 if (data != null) {
-                    mSendSocket?.let {
+                    mUdpSocket?.let {
                         it.send(DatagramPacket(data, data.size,
-                                mBroadcastAddress, PORT))
+                                mBroadcastAddress, SEND_PORT))
                     }
                 }
             }
@@ -112,12 +125,14 @@ class SyncBillsService : Service() {
             .subscribe()
         mRecvTask = Observable.create(ObservableOnSubscribe<String> {
             val buffer = ByteArray(1024)
-            val packet = DatagramPacket(buffer, buffer.size)
             loop@ while (true) {
+                val packet = DatagramPacket(buffer, buffer.size)
                 try {
-                    mRecvSocket!!.receive(packet)
-                    val rcvData = String(packet.data)
+                    mRecvSocket?.receive(packet)
+                    val rcvData = String(packet.data, packet.offset, packet.length)
+                    Log.Http.d("收到数据：$rcvData")
                     if (!rcvData.startsWith(PACK_PREFIX)) {
+                        Log.Http.d("不识别的请求：$rcvData")
                         continue
                     }
                     val packet = AAPacket.jsonToPacket(rcvData.split("_")[1])
@@ -138,6 +153,9 @@ class SyncBillsService : Service() {
                             // 收到账单数据
                             Log.Http.d("局域网账单：$packet")
                             handleBillData(packet)
+                        }
+                        else -> {
+                            Log.Http.d("不识别的请求：$rcvData")
                         }
                     }
                 } catch (e: IOException) {
@@ -164,6 +182,7 @@ class SyncBillsService : Service() {
             mRecvTask!!.dispose()
         }
         mSyncTimer.cancel()
+        mMulticastLock?.release()
     }
 
     /**
@@ -220,23 +239,11 @@ class SyncBillsService : Service() {
             val bill = JSON.parseObject(packet.data, BillRecord::class.java)
             billDao.insertBill(bill)
         }
-                .subscribeOn(Schedulers.io())
-                .subscribe(object : Observer<String> {
-                    override fun onComplete() {
+            .subscribeOn(Schedulers.io())
+            .subscribe(object : AAObserver<String>() {
+                override fun onNext(t: String) {
 
-                    }
-
-                    override fun onSubscribe(d: Disposable) {
-
-                    }
-
-                    override fun onNext(t: String) {
-
-                    }
-
-                    override fun onError(e: Throwable) {
-                        e.printStackTrace()
-                    }
-                })
+                }
+            })
     }
 }

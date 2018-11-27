@@ -21,6 +21,7 @@ import com.sddy.utils.TimeUtils;
 import com.sddy.utils.ViewUtils;
 import com.sddy.utils.log.Log;
 import com.shenyong.aabills.R;
+import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.databinding.FragmentAddBillBinding;
 import com.shenyong.aabills.listdata.BillTypeData;
 import com.shenyong.aabills.room.BillDatabase;
@@ -28,6 +29,7 @@ import com.shenyong.aabills.room.BillRecord;
 import com.shenyong.aabills.room.User;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -49,7 +51,6 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
     private SimpleBindingAdapter mAdapter;
     private List<BillTypeData> mTypeData = new ArrayList<>();
     private BillRecord mBill = new BillRecord();
-    private List<User> mUsers = new ArrayList<>();
     private int mSelYear, mSelMonth, mSelDay;
 
     @Override
@@ -80,78 +81,6 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
         mAdapter.updateData(mTypeData);
 
         mBinding.tvAddBillDate.setText("选择日期");
-
-        mBinding.rgAddBillUser.setBackground(ViewUtils.getDrawableBg(R.color.white, R.dimen.margin_bigger));
-        setHeadBg(mBinding.rbAddBillUserSy, mBinding.rbAddBillUserTy,
-                mBinding.rbAddBillUserQy, mBinding.rbAddBillUserSl);
-        mBinding.rgAddBillUser.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch (checkedId) {
-//                    case R.id.rb_add_bill_user_sy:
-//                        mBill.mUid = findUser("申勇").mId;
-//                        break;
-//                    case R.id.rb_add_bill_user_ty:
-//                        mBill.mUid = findUser("廷玉").mId;
-//                        break;
-//                    case R.id.rb_add_bill_user_qy:
-//                        mBill.mUid = findUser("漆英").mId;
-//                        break;
-//                    case R.id.rb_add_bill_user_sl:
-//                        mBill.mUid = findUser("世麟").mId;
-//                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-
-        mUsers.clear();
-        Observable.create(new ObservableOnSubscribe<User>() {
-            @Override
-            public void subscribe(ObservableEmitter<User> emitter) throws Exception {
-                List<User> users = BillDatabase.getInstance().userDao().queryAllUsers();
-                Log.Db.d("当前用户数：" + (users == null ? "null" : (users.size() + "")));
-                if (users != null) {
-                    for (User user : users) {
-                        Log.Db.d(user.toString());
-                        emitter.onNext(user);
-                    }
-                }
-                emitter.onComplete();
-            }
-        })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Consumer<User>() {
-            @Override
-            public void accept(User user) throws Exception {
-                Log.Db.d("查到一个用户：" + user.toString());
-                mUsers.add(user);
-            }
-        });
-    }
-
-    private User findUser(String name) {
-        for (User user : mUsers) {
-            if (user.mName.equals(name)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    private void setHeadBg(RadioButton... btns) {
-        ColorStateList colors = ViewUtils.getCheckableColors(R.color.head_color_gray, R.color.main_blue);
-        for (RadioButton btn : btns) {
-            GradientDrawable drawable = new GradientDrawable();
-            drawable.setColor(colors);
-            drawable.setShape(GradientDrawable.OVAL);
-            int size = getResources().getDimensionPixelSize(R.dimen.circle_head_size_in_item);
-            drawable.setSize(size, size);
-            btn.setBackground(drawable);
-            btn.setTextColor(ViewUtils.getCheckableColors(R.color.text_color_black, R.color.white));
-        }
     }
 
     @Override
@@ -175,8 +104,12 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                         mSelYear = year;
                         mSelMonth = month;
-                        mSelDay  =dayOfMonth;
-                        mBill.mTimestamp = new Date(year-1900, month, dayOfMonth).getTime();
+                        mSelDay = dayOfMonth;
+                        Calendar cal = Calendar.getInstance();
+                        cal.set(Calendar.YEAR, year-1900);
+                        cal.set(Calendar.MONTH, month);
+                        cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        mBill.mTimestamp = cal.getTimeInMillis();
                         mBinding.tvAddBillDate.setText(String.format("%d-%02d-%02d", year, month+1, dayOfMonth));
                     }
                 }, TimeUtils.getYear(), TimeUtils.getMonth(), TimeUtils.getDay());
@@ -212,10 +145,10 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
             MsgToast.shortToast("请选择日期");
             return;
         }
-//        if (mBill.mUserId == 0) {
-//            MsgToast.shortToast("请选择垫付人");
-//            return;
-//        }
+        User user = UserManager.INSTANCE.getUser();
+        if (user.isLogin && !TextUtils.isEmpty(user.mUid)) {
+            mBill.mUid = user.mUid;
+        }
         Observable.generate(new Consumer<Emitter<String>>() {
                     @Override
                     public void accept(Emitter<String> emitter) {

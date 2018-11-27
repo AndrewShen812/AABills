@@ -51,7 +51,7 @@ public class HeadSettingActivity extends BaseBindingActivity<ActivityHeadSetting
                 R.color.head_color_yellow, R.dimen.head_color_panel));
 
         mPreviewBg = DrawableUtils.getCircleDrawable(R.color.main_blue, R.dimen.circle_head_size);
-        User user = UserManager.Companion.getUser();
+        User user = UserManager.INSTANCE.getUser();
         mSelColor = user.mIconBg != 0 ? user.mIconBg : mSelColor;
         mPreviewBg.setColor(mSelColor);
         mBindings.tvHeadSettingPreview.setText(user.getNickName());
@@ -84,7 +84,7 @@ public class HeadSettingActivity extends BaseBindingActivity<ActivityHeadSetting
     }
 
     private void saveSetting() {
-        User user = UserManager.Companion.getUser();
+        User user = UserManager.INSTANCE.getUser();
         user.mIconBg = mSelColor;
         String nameBg = user.getNickName() + "&" + Integer.toString(mSelColor);
         String encode = Base64.encodeToString(nameBg.getBytes(), Base64.NO_WRAP);

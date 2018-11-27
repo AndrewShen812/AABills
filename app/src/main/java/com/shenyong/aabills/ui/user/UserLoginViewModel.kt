@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModel
 import com.sddy.baseui.dialog.MsgToast
 import com.shenyong.aabills.SyncBillsService
 import com.shenyong.aabills.UserManager
+import com.shenyong.aabills.api.AAObserver
 import com.shenyong.aabills.api.API
 import com.shenyong.aabills.api.bean.LoginResult
 import com.shenyong.aabills.api.bean.MobResponse
@@ -31,45 +32,10 @@ class UserLoginViewModel : ViewModel() {
     fun userLogin() {
         val phone = phoneText.value ?: ""
         val pwd = pwdText.value ?: ""
-        API.mobApi.login(MobService.LOGIN, MobService.KEY, phone, pwd)
-                .map {
-                    if (it.isSuccess() && it.result != null) {
-                        val user = User("")
-                        user.mPhone = phone
-                        user.mPwd = pwd
-                        user.mUid = it.result?.uid ?: ""
-                        BillDatabase.getInstance().userDao().insertUser(user)
-                    }
-                    return@map it
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<MobResponse<LoginResult>> {
-                    override fun onComplete() {
-                    }
-
-                    override fun onSubscribe(d: Disposable) {
-                    }
-
-                    override fun onNext(t: MobResponse<LoginResult>) {
-                        loginSuccess.value = t.isSuccess()
-                        if (t.isSuccess() && t.result != null) {
-                            UserManager.user.isLogin = true
-                            UserManager.user.mPhone = phone
-                            UserManager.user.mPwd = pwd
-                            UserManager.user.mUid = t.result?.uid ?: ""
-                            UserManager.user.mToken = t.result?.token ?: ""
-                            SyncBillsService.startService()
-                        }
-                        if (!t.isSuccess() && t.hasMsg()) {
-                            MsgToast.shortToast(t.msg)
-                        }
-                    }
-
-                    override fun onError(e: Throwable) {
-                        loginSuccess.value = false
-                    }
-
-                })
+        UserManager.login(phone, pwd, object : AAObserver<MobResponse<LoginResult>>() {
+            override fun onNext(response: MobResponse<LoginResult>) {
+                loginSuccess.value = response.isSuccess() && response.result != null
+            }
+        })
     }
 }

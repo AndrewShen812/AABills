@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.sddy.baseui.BaseActivity;
 import com.shenyong.aabills.R;
+import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.ui.user.UserLoginActivity;
 
 public class StartupActivity extends BaseActivity {
@@ -13,6 +14,7 @@ public class StartupActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_startup);
         showFullScreen();
+        UserManager.INSTANCE.autoLogin();
     }
 
     @Override

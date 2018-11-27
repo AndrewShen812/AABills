@@ -94,13 +94,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                 MsgToast.shortToast("再按一次退出AA账单");
                 return true;
             }
-            // 保存登录信息
-            mViewModel.saveLoginUser(new Consumer<String>() {
-                @Override
-                public void accept(String s) throws Exception {
-                    AABilsApp.getInstance().exitApp();
-                }
-            });
+            AABilsApp.getInstance().exitApp();
             return true;
         }
         return super.onKeyDown(keyCode, event);

@@ -108,74 +108,6 @@
             app:layout_constraintBottom_toBottomOf="@id/view_amount_date_bg" />
 
 
-        <TextView
-            android:id="@+id/tv_daa_bill_user"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="由他(她)垫付"
-            style="@style/TextDefBlack"
-            app:layout_constraintTop_toBottomOf="@id/view_amount_date_bg"
-            app:layout_constraintStart_toStartOf="@id/view_amount_date_bg"
-            android:layout_marginTop="@dimen/margin_large"/>
-
-        <RadioGroup
-            android:id="@+id/rg_add_bill_user"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            tools:background="@color/white"
-            android:paddingTop="@dimen/margin_large"
-            android:paddingBottom="@dimen/margin_large"
-            android:layout_marginTop="@dimen/margin_large"
-            android:layout_marginStart="@dimen/margin_large"
-            android:layout_marginEnd="@dimen/margin_large"
-            app:layout_constraintTop_toBottomOf="@id/tv_daa_bill_user">
-
-            <RadioButton
-                android:id="@+id/rb_add_bill_user_sy"
-                android:layout_width="@dimen/circle_head_size_in_item"
-                android:layout_height="@dimen/circle_head_size_in_item"
-                android:gravity="center"
-                tools:background="@drawable/shape_dot"
-                style="@style/TextDefBlack"
-                android:layout_marginStart="@dimen/margin_large"
-                android:button="@null"
-                android:text="申勇"/>
-
-            <RadioButton
-                android:id="@+id/rb_add_bill_user_ty"
-                android:layout_width="@dimen/circle_head_size_in_item"
-                android:layout_height="@dimen/circle_head_size_in_item"
-                android:gravity="center"
-                tools:background="@drawable/shape_dot"
-                style="@style/TextDefBlack"
-                android:layout_marginStart="@dimen/margin_20dp"
-                android:button="@null"
-                android:text="廷玉"/>
-
-            <RadioButton
-                android:id="@+id/rb_add_bill_user_qy"
-                android:layout_width="@dimen/circle_head_size_in_item"
-                android:layout_height="@dimen/circle_head_size_in_item"
-                android:gravity="center"
-                tools:background="@drawable/shape_dot"
-                style="@style/TextDefBlack"
-                android:layout_marginStart="@dimen/margin_20dp"
-                android:button="@null"
-                android:text="漆英"/>
-
-            <RadioButton
-                android:id="@+id/rb_add_bill_user_sl"
-                android:layout_width="@dimen/circle_head_size_in_item"
-                android:layout_height="@dimen/circle_head_size_in_item"
-                android:gravity="center"
-                tools:background="@drawable/shape_dot"
-                style="@style/TextDefBlack"
-                android:layout_marginStart="@dimen/margin_20dp"
-                android:button="@null"
-                android:text="世麟"/>
-
-        </RadioGroup>
         <Button
             android:id="@+id/btn_add_bill_ok"
             android:layout_width="0dp"
@@ -183,13 +115,13 @@
             style="@style/TextBigWhite"
             android:layout_marginEnd="@dimen/margin_large"
             android:layout_marginStart="@dimen/margin_large"
-            android:layout_marginTop="@dimen/margin_big"
+            android:layout_marginTop="@dimen/margin_large"
             android:text="@string/add_a_bill"
             android:background="@drawable/selector_main_press_light_corner"
             android:onClick="@{(v)->presenter.onClick(v)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rg_add_bill_user" />
+            app:layout_constraintTop_toBottomOf="@+id/view_amount_date_bg" />
 
 
     </android.support.constraint.ConstraintLayout>

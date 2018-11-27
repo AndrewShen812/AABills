@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -13,8 +14,8 @@ public interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertUser(User user);
 
-    @Insert
-    void insertUsers(List<User> users);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void updateLastLogin(List<User> users);
 
     @Query("select * from user where mName = :name")
     User queryUser(String name);
@@ -27,6 +28,9 @@ public interface UserDao {
 
     @Query("select * from user")
     List<User> queryAllUsers();
+
+    @Query("select * from user where mUid != :uid")
+    List<User> queryOtherUsers(String uid);
 
     @Query("select * from sync_record where mMyUid = :myUid and mLANUid = :lanUid")
     UserSyncRecord getSyncRecord(String myUid, String lanUid);

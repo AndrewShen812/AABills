@@ -12,7 +12,6 @@ public class AABilsApp extends BaseApplication {
 
         MobSDK.init(this);
         Stetho.initializeWithDefaults(this);
-        UserManager.Companion.autoLogin();
     }
 
     @Override

@@ -44,7 +44,7 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
     @Override
     public void onResume() {
         super.onResume();
-        if (UserManager.Companion.getUser().isLogin) {
+        if (UserManager.INSTANCE.getUser().isLogin) {
             mBinding.btnUserCenterSignOut.setBackground(ViewUtils.getMultiStateBg(R.color.btn_red,
                     R.color.btn_red_light, R.color.btn_red_light, R.dimen.margin_small));
             mBinding.btnUserCenterSignOut.setText("退出登录");
@@ -77,8 +77,8 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
     }
 
     private void loginOrOut() {
-        if (UserManager.Companion.getUser().isLogin) {
-            UserManager.Companion.getUser().isLogin = false;
+        if (UserManager.INSTANCE.getUser().isLogin) {
+            UserManager.INSTANCE.getUser().isLogin = false;
             MsgToast.shortToast("已退出登录");
             mBinding.btnUserCenterSignOut.setText("登录");
             mBinding.btnUserCenterSignOut.setBackgroundResource(R.drawable.selector_main_press_light_corner);
@@ -88,7 +88,7 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
     }
 
     private void setHeadColor() {
-        if (!UserManager.Companion.getUser().isLogin) {
+        if (!UserManager.INSTANCE.getUser().isLogin) {
             MsgToast.centerToast("请先登录");
             startActivity(HeadSettingActivity.class);
             return;
@@ -97,7 +97,7 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
     }
 
     private void setNickName() {
-        User user = UserManager.Companion.getUser();
+        User user = UserManager.INSTANCE.getUser();
         if (!user.isLogin) {
             MsgToast.centerToast("请先登录");
             startActivity(HeadSettingActivity.class);

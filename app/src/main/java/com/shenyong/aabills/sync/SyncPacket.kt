@@ -30,6 +30,7 @@ data class AAPacket(
             try {
                 return JSON.parseObject(json, AAPacket::class.java)
             } catch (e: Exception) {
+                e.printStackTrace()
             }
             return AAPacket()
         }

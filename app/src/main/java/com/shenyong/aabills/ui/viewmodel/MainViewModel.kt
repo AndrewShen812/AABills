@@ -19,35 +19,4 @@ import io.reactivex.schedulers.Schedulers
  */
 class MainViewModel : ViewModel() {
 
-    fun saveLoginUser(@NonNull next: Consumer<String>) {
-        val user = UserManager.user
-        if (!user.isLogin) {
-            next.accept("ok")
-            return
-        }
-        Observable.create<String> {
-            val userDao = BillDatabase.getInstance().userDao()
-            user.isLastLogin = true
-            userDao.insertUser(user)
-            it.onNext("ok")
-            it.onComplete()
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<String> {
-                override fun onSubscribe(d: Disposable) {
-                }
-
-                override fun onComplete() {
-                    next.accept("ok")
-                }
-
-                override fun onNext(t: String) {
-                }
-
-                override fun onError(e: Throwable) {
-                    next.accept("ok")
-                }
-            })
-    }
 }
