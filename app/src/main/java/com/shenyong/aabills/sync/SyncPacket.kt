@@ -23,7 +23,7 @@ data class AAPacket(
         }
 
         fun dataPacket(orgIp: String, orgUid: String): AAPacket {
-            return AAPacket(type = TYPE_DATA)
+            return AAPacket(type = TYPE_DATA, orgIp = orgIp, orgUid = orgUid)
         }
 
         fun jsonToPacket(json: String): AAPacket {

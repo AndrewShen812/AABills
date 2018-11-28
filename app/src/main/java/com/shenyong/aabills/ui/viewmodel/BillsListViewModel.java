@@ -48,7 +48,7 @@ public class BillsListViewModel {
                                 userMap.put(bill.mUid, user);
                             }
                             BillRecordData data = new BillRecordData();
-                            data.mTime = TimeUtils.getTimeString(bill.mTimestamp, "yyyy年MM月dd日")
+                            data.mTime = TimeUtils.getTimeString(bill.mBillTime, "yyyy年MM月dd日")
                             + "-" + user.mName;
                             data.mType = "消费类型：" + bill.mType;
                             data.mAmount = String.format("%.1f元", bill.mAmount);

@@ -25,14 +25,17 @@ public interface BillDao {
     @Query("select * from bill_record")
     List<BillRecord> getAllBills();
 
-    @Query("select * from bill_record where mTimestamp >= :startTime and mTimestamp < :endTime")
+    @Query("select * from bill_record where mBillTime >= :startTime and mBillTime < :endTime")
     List<BillRecord> getBills(long startTime, long endTime);
 
     /**
-     * 获取晚于某个时间的账单
+     * 需要同步的账单，获取晚于某个时间、且不属于指定用户的账单，发送给局域网内的其他用户
      */
-    @Query("select * from bill_record where mTimestamp > :lastTime")
-    List<BillRecord> getLaterBills(long lastTime);
+    @Query("select * from bill_record where mAddTime > :lastTime and mUid != :exceptUid")
+    List<BillRecord> getNeedSyncBills(long lastTime, String exceptUid);
+
+    @Query("select * from bill_record where mUid != :exceptUid")
+    List<BillRecord> getNeedSyncBills(String exceptUid);
 
     @Query("select * from bill_record where mUid is null")
     List<BillRecord> getNoUidBills();

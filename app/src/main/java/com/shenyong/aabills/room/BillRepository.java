@@ -63,9 +63,9 @@ public class BillRepository {
                     Collections.sort(bills, new Comparator<BillRecord>() {
                         @Override
                         public int compare(BillRecord o1, BillRecord o2) {
-                            if (o2.mTimestamp > o1.mTimestamp) {
+                            if (o2.mBillTime > o1.mBillTime) {
                                 return 1;
-                            } else if (o2.mTimestamp < o1.mTimestamp) {
+                            } else if (o2.mBillTime < o1.mBillTime) {
                                 return -1;
                             }
                             return 0;
@@ -124,9 +124,9 @@ public class BillRepository {
                         Collections.sort(bills, new Comparator<BillRecord>() {
                             @Override
                             public int compare(BillRecord o1, BillRecord o2) {
-                                if (o2.mTimestamp > o1.mTimestamp) {
+                                if (o2.mBillTime > o1.mBillTime) {
                                     return 1;
-                                } else if (o2.mTimestamp < o1.mTimestamp) {
+                                } else if (o2.mBillTime < o1.mBillTime) {
                                     return -1;
                                 }
                                 return 0;

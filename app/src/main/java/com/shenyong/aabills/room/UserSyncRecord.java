@@ -24,8 +24,8 @@ public class UserSyncRecord {
     @NonNull
     public String mLastSentBillId;
 
-    /** 最近同步的最后一笔账单的时间戳，大于该时间本地账单的则需要同步给别人 */
+    /** 最近同步的最后一笔账单的记录时间，大于该时间本地账单的则需要同步给别人 */
     @ColumnInfo
     @NonNull
-    public long mLastSentBillTimestamp;
+    public long mLastSentBillAddTime;
 }

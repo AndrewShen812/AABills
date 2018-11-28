@@ -106,10 +106,10 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
                         mSelMonth = month;
                         mSelDay = dayOfMonth;
                         Calendar cal = Calendar.getInstance();
-                        cal.set(Calendar.YEAR, year-1900);
+                        cal.set(Calendar.YEAR, year);
                         cal.set(Calendar.MONTH, month);
                         cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        mBill.mTimestamp = cal.getTimeInMillis();
+                        mBill.mBillTime = cal.getTimeInMillis();
                         mBinding.tvAddBillDate.setText(String.format("%d-%02d-%02d", year, month+1, dayOfMonth));
                     }
                 }, TimeUtils.getYear(), TimeUtils.getMonth(), TimeUtils.getDay());
@@ -141,10 +141,11 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
             return;
         }
         mBill.mAmount = dAmount;
-        if (mBill.mTimestamp == 0) {
+        if (mBill.mBillTime == 0) {
             MsgToast.shortToast("请选择日期");
             return;
         }
+        mBill.mAddTime = System.currentTimeMillis();
         User user = UserManager.INSTANCE.getUser();
         if (user.isLogin && !TextUtils.isEmpty(user.mUid)) {
             mBill.mUid = user.mUid;

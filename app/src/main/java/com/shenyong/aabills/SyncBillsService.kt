@@ -21,7 +21,6 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.io.IOException
 import java.net.DatagramPacket
-import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.MulticastSocket
 import java.util.*
@@ -36,18 +35,20 @@ class SyncBillsService : Service() {
 
     private var mSendTask: Disposable? = null
     private var mRecvTask: Disposable? = null
-    private var mUdpSocket: MulticastSocket? = null
+    private var mSendSocket: MulticastSocket? = null
     private var mRecvSocket: MulticastSocket? = null
     private val mSendQueue = LinkedBlockingQueue<ByteArray>(100)
     private val mSyncTimer = RxTimer()
-    private lateinit var mBroadcastAddress: InetAddress
+    // 组播地址
+    private lateinit var mGroupAddress: InetAddress
     private var mMyIp: String = ""
     private var mMulticastLock: WifiManager.MulticastLock? = null
 
     companion object {
-        private const val SEND_PORT = 10085
-        private const val PORT = 10086
+        private const val PORT = 9999
         private const val PACK_PREFIX = "aabillsSync"
+        // https://baike.baidu.com/item/%E7%BB%84%E6%92%AD%E5%9C%B0%E5%9D%80/6095039?fr=aladdin
+        private const val GROUP_IP = "224.0.0.251"
 
         fun startService() {
             val context = AABilsApp.getInstance().applicationContext
@@ -93,18 +94,12 @@ class SyncBillsService : Service() {
         mMulticastLock = manager.createMulticastLock("AABills Sync")
         mMulticastLock?.acquire()
         try {
-//            mBroadcastAddress = WifiUtils.getBroadcastAddress(this)
-            mBroadcastAddress = InetAddress.getByName("239.255.255.250")
-            mUdpSocket = MulticastSocket(PORT)
-//            mUdpSocket = DatagramSocket()
-            //设置本MulticastSocket发送的数据报被回送到自身
-            mUdpSocket?.loopbackMode = false
-            mUdpSocket?.reuseAddress = true
-//            mUdpSocket?.broadcast = true
-            mUdpSocket!!.joinGroup(mBroadcastAddress)
+            mGroupAddress = InetAddress.getByName(GROUP_IP)
+            mSendSocket = MulticastSocket(PORT)
+            mSendSocket?.reuseAddress = true
+            mSendSocket?.joinGroup(mGroupAddress)
             mRecvSocket = MulticastSocket(PORT)
-//            mRecvSocket?.broadcast = true
-            mRecvSocket!!.joinGroup(mBroadcastAddress)
+            mRecvSocket?.joinGroup(mGroupAddress)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -114,9 +109,9 @@ class SyncBillsService : Service() {
             while (true) {
                 val data = mSendQueue.poll()
                 if (data != null) {
-                    mUdpSocket?.let {
+                    mSendSocket?.let {
                         it.send(DatagramPacket(data, data.size,
-                                mBroadcastAddress, SEND_PORT))
+                                mGroupAddress, PORT))
                     }
                 }
             }
@@ -130,7 +125,6 @@ class SyncBillsService : Service() {
                 try {
                     mRecvSocket?.receive(packet)
                     val rcvData = String(packet.data, packet.offset, packet.length)
-                    Log.Http.d("收到数据：$rcvData")
                     if (!rcvData.startsWith(PACK_PREFIX)) {
                         Log.Http.d("不识别的请求：$rcvData")
                         continue
@@ -196,23 +190,23 @@ class SyncBillsService : Service() {
             val syncRecord = userDao.getSyncRecord(user.mUid, packet.orgUid)
             var bills = if (syncRecord == null) {
                 // 同步全部
-                billDao.allBills
+                billDao.getNeedSyncBills(packet.orgUid)
             } else {
                 // 部分同步
-                billDao.getLaterBills(syncRecord.mLastSentBillTimestamp)
+                billDao.getNeedSyncBills(syncRecord.mLastSentBillAddTime, packet.orgUid)
             }
             if (bills.isNotEmpty()) {
                 sendBills(bills, packet.orgIp, packet.orgUid)
                 // 更新本机的同步记录
                 val bill = bills.last()
                 bills.sortWith(Comparator { b1, b2 ->
-                    return@Comparator (b1.mTimestamp - b2.mTimestamp).toInt()
+                    return@Comparator (b1.mAddTime - b2.mAddTime).toInt()
                 })
                 val syncRecord = UserSyncRecord()
                 syncRecord.mMyUid = user.mUid
                 syncRecord.mLANUid = packet.orgUid
                 syncRecord.mLastSentBillId = bill.mId
-                syncRecord.mLastSentBillTimestamp = bill.mTimestamp
+                syncRecord.mLastSentBillAddTime = bill.mAddTime
                 userDao.updateSyncRecord(syncRecord)
             }
         }

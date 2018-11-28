@@ -38,7 +38,7 @@ public class BillStatisticsViewModel {
                 final List<BillRecordData> billsData = new ArrayList<>();
                 final HashMap<String, List<BillRecord>> monthStat = new HashMap<>();
                 for (BillRecord billRecord : bills) {
-                    String month = TimeUtils.getTimeString(billRecord.mTimestamp, PATTERN_MONTH);
+                    String month = TimeUtils.getTimeString(billRecord.mBillTime, PATTERN_MONTH);
                     List<BillRecord> subList = monthStat.get(month);
                     if (subList == null) {
                         subList = new ArrayList<>();
