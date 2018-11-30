@@ -3,6 +3,7 @@ package com.shenyong.aabills.ui.viewmodel;
 import android.annotation.SuppressLint;
 
 import com.sddy.utils.ArrayUtils;
+import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.api.API;
 import com.shenyong.aabills.api.MobService;
 import com.shenyong.aabills.api.bean.LoginResult;
@@ -88,6 +89,7 @@ public class StatisticViewModel {
         Map<String, UserCostData> costMap = new HashMap<>();
         double total = 0;
         UserDao userDao = BillDatabase.getInstance().userDao();
+        User loginUser = UserManager.INSTANCE.getUser();
         for (BillRecord bill : bills) {
             StatisticTypeData type = typesMap.get(bill.mType);
             if (type == null) {
@@ -103,7 +105,7 @@ public class StatisticViewModel {
                 cost = new UserCostData();
                 costMap.put(bill.mUid, cost);
                 User user = userDao.findLocalUser(bill.mUid);
-                cost.mName = user.mName;
+                cost.mName = user == null ? "本机" : user.mName;
             }
             cost.mCost += bill.mAmount;
         }

@@ -1,5 +1,6 @@
 package com.shenyong.aabills.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -71,7 +72,7 @@ public class StatisticFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = new BillStatisticsViewModel();
+        mViewModel = ViewModelProviders.of(this).get(BillStatisticsViewModel.class);
     }
 
     @Override

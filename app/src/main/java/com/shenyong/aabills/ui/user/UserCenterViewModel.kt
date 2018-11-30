@@ -3,6 +3,7 @@ package com.shenyong.aabills.ui.user
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.shapes.Shape
 import android.util.Base64
 import com.sddy.utils.DimenUtils
 import com.sddy.utils.ViewUtils
@@ -46,8 +47,9 @@ class UserCenterViewModel : ViewModel() {
 
     fun loadUserProfile() {
         val user = UserManager.user
+        setDefaultHead()
         if (!user.isLogin) {
-            setDefaultHead()
+            userName.value = "本机"
             return
         }
         headColor = if (user.mIconBg == 0) headColor else user.mIconBg
@@ -100,6 +102,7 @@ class UserCenterViewModel : ViewModel() {
                     }
 
                     override fun onError(e: Throwable) {
+                        e.printStackTrace()
                     }
 
                 })

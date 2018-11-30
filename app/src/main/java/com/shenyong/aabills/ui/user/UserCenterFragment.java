@@ -11,6 +11,7 @@ import com.sddy.baseui.dialog.MsgDialog;
 import com.sddy.baseui.dialog.MsgToast;
 import com.sddy.utils.ViewUtils;
 import com.shenyong.aabills.R;
+import com.shenyong.aabills.SyncBillsService;
 import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.databinding.FragmentUserCenterBinding;
 import com.shenyong.aabills.room.User;
@@ -33,10 +34,6 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
         setTitle(R.string.title_user_center);
         setBackBtnVisible(false);
         mViewModel = ViewModelProviders.of(this).get(UserCenterViewModel.class);
-        mBinding.viewUserCennterNameBg.setBackground(ViewUtils.getDrawableBg(R.color.white, R.dimen.margin_mid));
-        mBinding.viewUserCennterSettingBg.setBackground(ViewUtils.getDrawableBg(R.color.white, R.dimen.margin_mid));
-        mBinding.tvUserCenterSync.setBackground(ViewUtils.getMultiStateBg(R.color.white,
-                R.color.white_85, R.color.white_85, R.dimen.margin_mid));
         mBinding.setModel(mViewModel);
         mBinding.setPresenter(this);
     }
@@ -59,14 +56,14 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
     public void onClick(View v) {
         super.onClick(v);
         switch (v.getId()) {
-            case R.id.tv_user_center_color:
+            case R.id.cv_user_center_color:
                 setHeadColor();
                 break;
-            case R.id.tv_user_center_nickname:
+            case R.id.cv_user_center_nickname:
                 setNickName();
                 break;
-            case R.id.tv_user_center_sync:
-
+            case R.id.cv_user_center_sync:
+                syncWlanBills();
                 break;
             case R.id.btn_user_center_sign_out:
                 loginOrOut();
@@ -90,7 +87,6 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
     private void setHeadColor() {
         if (!UserManager.INSTANCE.getUser().isLogin) {
             MsgToast.centerToast("请先登录");
-            startActivity(HeadSettingActivity.class);
             return;
         }
         startActivity(HeadSettingActivity.class);
@@ -100,7 +96,6 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
         User user = UserManager.INSTANCE.getUser();
         if (!user.isLogin) {
             MsgToast.centerToast("请先登录");
-            startActivity(HeadSettingActivity.class);
             return;
         }
         MsgDialog dialog = new MsgDialog();
@@ -124,5 +119,14 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
             }
         });
         dialog.show(getFragmentManager());
+    }
+
+    private void syncWlanBills() {
+        User user = UserManager.INSTANCE.getUser();
+        if (!user.isLogin) {
+            MsgToast.centerToast("请先登录");
+            return;
+        }
+        SyncBillsService.Companion.startService();
     }
 }

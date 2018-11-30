@@ -170,11 +170,21 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
                     @Override
                     public void accept(String billRecord) throws Exception {
                         if ("OK".equals(billRecord)) {
+                            clearUiData();
                             MsgToast.shortToast("账单记录成功");
                         } else {
                             MsgToast.shortToast("账单记录失败了");
                         }
                     }
                 });
+    }
+
+    private void clearUiData() {
+        for (BillTypeData typeData : mTypeData) {
+            typeData.setChecked(false);
+        }
+        mBinding.editText.setText("");
+        mBinding.tvAddBillDate.setText("");
+        mBill = new BillRecord();
     }
 }

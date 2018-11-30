@@ -1,5 +1,8 @@
 package com.shenyong.aabills.ui.viewmodel;
 
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.ViewModel;
+
 import com.sddy.utils.ArrayUtils;
 import com.sddy.utils.TimeUtils;
 import com.shenyong.aabills.listdata.BillRecordData;
@@ -14,11 +17,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class BillStatisticsViewModel {
+public class BillStatisticsViewModel extends ViewModel {
 
     public static final String PATTERN_MONTH = "yyyy年MM月";
 
     private BillRepository mBillRepository;
+
+    public MutableLiveData<List<BillRecordData>> mStatisticList = new MutableLiveData<>();
 
     public BillStatisticsViewModel() {
         mBillRepository = BillRepository.getInstance();

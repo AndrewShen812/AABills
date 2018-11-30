@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="presenter"
             type="com.shenyong.aabills.ui.user.UserCenterFragment" />
+
         <variable
             name="model"
             type="com.shenyong.aabills.ui.user.UserCenterViewModel" />
@@ -17,124 +19,143 @@
         android:layout_height="match_parent"
         android:background="@color/background_color">
 
-        <View
-            android:id="@+id/view_user_cennter_name_bg"
+        <android.support.v7.widget.CardView
+            android:id="@+id/cv_user_center_name"
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_margin="@dimen/margin_large"
-            tools:background="@color/white"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:foreground="?android:selectableItemBackgroundBorderless"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="@dimen/margin_mid"
+            app:cardElevation="@dimen/margin_smallest"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tv_user_center_circle_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="申勇"
-            android:text="@{model.userName}"
-            style="@style/TextDefWhite"
-            android:gravity="center"
-            tools:background="@color/black"
-            android:background="@{model.headBg}"
-            android:layout_marginStart="@dimen/margin_large"
-            app:layout_constraintStart_toStartOf="@id/view_user_cennter_name_bg"
-            app:layout_constraintTop_toTopOf="@id/view_user_cennter_name_bg"
-            app:layout_constraintBottom_toBottomOf="@id/view_user_cennter_name_bg" />
+            <TextView
+                android:id="@+id/tv_user_center_circle_name"
+                style="@style/TextDefWhite"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/margin_large"
+                android:background="@{model.headBg}"
+                android:gravity="center"
+                android:padding="@dimen/margin_small"
+                android:text="@{model.userName}"
+                tools:background="@color/main_blue"
+                tools:text="申勇" />
 
-        <TextView
-            android:id="@+id/tv_user_center_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/TextDefBlack"
-            tools:text="申勇"
-            android:text="@{model.userName}"
-            android:layout_marginStart="@dimen/margin_20dp"
-            app:layout_constraintStart_toEndOf="@id/tv_user_center_circle_name"
-            app:layout_constraintTop_toTopOf="@id/view_user_cennter_name_bg"
-            app:layout_constraintBottom_toBottomOf="@id/view_user_cennter_name_bg" />
+            <TextView
+                android:id="@+id/tv_user_center_name"
+                style="@style/TextDefBlack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="76dp"
+                android:text="@{model.userName}"
+                tools:text="申勇" />
 
-        <View
-            android:id="@+id/view_user_cennter_setting_bg"
+        </android.support.v7.widget.CardView>
+
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cv_user_center_color"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_large"
-            tools:background="@color/white"
-            app:layout_constraintTop_toBottomOf="@id/view_user_cennter_name_bg" />
-
-        <TextView
-            android:id="@+id/tv_user_center_color"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            style="@style/TextDefBlack"
-            android:gravity="center_vertical"
-            android:text="@string/user_center_head_color"
-            android:layout_marginStart="@dimen/margin_large"
-            android:layout_marginEnd="@dimen/margin_large"
+            android:foreground="?android:selectableItemBackgroundBorderless"
             android:onClick="@{(v)->presenter.onClick(v)}"
-            android:drawableRight="@drawable/icon_item_more"
-            android:background="@drawable/selector_press_white_light"
-            app:layout_constraintTop_toTopOf="@id/view_user_cennter_setting_bg"
-            app:layout_constraintBottom_toTopOf="@id/view_user_center_setting_div"
-            app:layout_constraintStart_toStartOf="@id/view_user_cennter_setting_bg"
-            app:layout_constraintEnd_toEndOf="@id/view_user_cennter_setting_bg" />
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="@dimen/margin_mid"
+            app:cardElevation="@dimen/margin_smallest"
+            app:layout_constraintTop_toBottomOf="@id/cv_user_center_name">
 
-        <View
-            android:id="@+id/view_user_center_setting_div"
-            android:layout_width="0dp"
-            android:layout_height="0.5dp"
-            android:background="@color/line_gray"
-            app:layout_constraintTop_toTopOf="@id/view_user_cennter_setting_bg"
-            app:layout_constraintBottom_toBottomOf="@id/view_user_cennter_setting_bg"
-            app:layout_constraintStart_toStartOf="@id/view_user_cennter_setting_bg"
-            app:layout_constraintEnd_toEndOf="@id/view_user_cennter_setting_bg" />
+            <TextView
+                android:id="@+id/tv_user_center_color"
+                style="@style/TextDefBlack"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_large"
+                android:background="@drawable/selector_press_white_light"
+                android:drawableRight="@drawable/icon_item_more"
+                android:gravity="center_vertical"
+                android:text="@string/user_center_head_color" />
+        </android.support.v7.widget.CardView>
 
-        <TextView
-            android:id="@+id/tv_user_center_nickname"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            style="@style/TextDefBlack"
-            android:gravity="center_vertical"
-            android:text="@string/user_center_set_nickname"
-            android:layout_marginStart="@dimen/margin_large"
-            android:layout_marginEnd="@dimen/margin_large"
+        <android.support.v7.widget.CardView
+            android:id="@+id/cv_user_center_nickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_large"
+            android:foreground="?android:selectableItemBackgroundBorderless"
             android:onClick="@{(v)->presenter.onClick(v)}"
-            android:drawableRight="@drawable/icon_item_more"
-            android:background="@drawable/selector_press_white_light"
-            app:layout_constraintTop_toBottomOf="@id/view_user_center_setting_div"
-            app:layout_constraintBottom_toBottomOf="@id/view_user_cennter_setting_bg"
-            app:layout_constraintStart_toStartOf="@id/view_user_cennter_setting_bg"
-            app:layout_constraintEnd_toEndOf="@id/view_user_cennter_setting_bg" />
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="@dimen/margin_mid"
+            app:cardElevation="@dimen/margin_smallest"
+            app:layout_constraintTop_toBottomOf="@id/cv_user_center_color">
+
+            <TextView
+                android:id="@+id/tv_user_center_nickname"
+                style="@style/TextDefBlack"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_large"
+                android:background="@drawable/selector_press_white_light"
+                android:drawableRight="@drawable/icon_item_more"
+                android:gravity="center_vertical"
+                android:text="@string/user_center_set_nickname" />
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cv_user_center_sync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_large"
+            android:foreground="?android:selectableItemBackgroundBorderless"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="@dimen/margin_mid"
+            app:cardElevation="@dimen/margin_smallest"
+            android:onClick="@{(v)->presenter.onClick(v)}"
+            app:layout_constraintTop_toBottomOf="@id/cv_user_center_nickname">
+
+            <TextView
+                android:id="@+id/tv_user_center_sync"
+                style="@style/TextDefBlack"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_large"
+                android:gravity="center_vertical"
+                android:text="同步好友数据" />
+
+        </android.support.v7.widget.CardView>
 
         <TextView
-            android:id="@+id/tv_user_center_sync"
-            style="@style/TextDefBlack"
+            android:id="@+id/tv_user_center_sync_desc"
+            style="@style/TextSmallGray"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:drawableRight="@drawable/icon_item_more"
-            android:paddingStart="@dimen/margin_large"
-            android:paddingEnd="@dimen/margin_large"
-            android:layout_marginTop="@dimen/margin_large"
             android:layout_marginStart="@dimen/margin_large"
+            android:layout_marginTop="@dimen/margin_small"
             android:layout_marginEnd="@dimen/margin_large"
             android:gravity="center_vertical"
-            android:text="同步好友数据"
-            android:onClick="@{(v)->presenter.onClick(v)}"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_user_center_nickname" />
+            android:paddingEnd="@dimen/margin_large"
+            android:text="发现局域网内的其他用户，并尝试同步其他用户的数据到本机上。如1分钟内未发现其他用户，将停止同步服务。（建议同步前先邀请好友上线）"
+            app:layout_constraintTop_toBottomOf="@id/cv_user_center_sync"/>
 
         <Button
             android:id="@+id/btn_user_center_sign_out"
+            style="@style/TextBigWhite"
             android:layout_width="0dp"
             android:layout_height="@dimen/btn_common_h"
-            android:text="@string/user_center_sign_out"
-            android:layout_marginTop="90dp"
-            style="@style/TextBigWhite"
-            android:onClick="@{(v)->presenter.onClick(v)}"
             android:layout_marginStart="@dimen/margin_large"
+            android:layout_marginTop="32dp"
             android:layout_marginEnd="@dimen/margin_large"
-            app:layout_constraintStart_toStartOf="parent"
+            android:background="@drawable/selector_main_press_light_corner"
+            android:onClick="@{(v)->presenter.onClick(v)}"
+            android:text="@string/user_center_sign_out"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/view_user_cennter_setting_bg" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_user_center_sync_desc" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>
