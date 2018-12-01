@@ -16,8 +16,8 @@ public interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertUser(User user);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void updateLastLogin(List<User> users);
+    @Query("update user set isLastLogin = :isLastLogin where mUid = :uid")
+    void updateLastLogin(String uid, boolean isLastLogin);
 
     @Query("select * from user where mUid = :id")
     User findLocalUser(String id);

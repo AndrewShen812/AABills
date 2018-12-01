@@ -14,6 +14,7 @@ import com.shenyong.aabills.room.BillRecord
 import com.shenyong.aabills.room.User
 import com.shenyong.aabills.room.UserSyncRecord
 import com.shenyong.aabills.sync.AAPacket
+import com.shenyong.aabills.utils.RxBus
 import com.shenyong.aabills.utils.RxTimer
 import com.shenyong.aabills.utils.WifiUtils
 import io.reactivex.Observable
@@ -40,10 +41,12 @@ class SyncBillsService : Service() {
     private var mRecvSocket: MulticastSocket? = null
     private val mSendQueue = LinkedBlockingQueue<ByteArray>(100)
     private val mSyncTimer = RxTimer()
+    private val mTimeOutTimer = RxTimer()
     // 组播地址
     private lateinit var mGroupAddress: InetAddress
     private var mMyIp: String = ""
     private var mMulticastLock: WifiManager.MulticastLock? = null
+    private var remainTime = TIME_OUT
 
     companion object {
         private const val PORT = 9999
@@ -51,6 +54,7 @@ class SyncBillsService : Service() {
         // https://baike.baidu.com/item/%E7%BB%84%E6%92%AD%E5%9C%B0%E5%9D%80/6095039?fr=aladdin
         private const val GROUP_IP = "224.0.0.251"
 //        private const val GROUP_IP = "238.255.255.1"
+        private const val TIME_OUT = 60
 
         fun startService() {
             val context = AABilsApp.getInstance().applicationContext
@@ -84,6 +88,19 @@ class SyncBillsService : Service() {
         }
     }
 
+    private fun startTimeOutTimer() {
+        mTimeOutTimer.interval(1_000) {
+            remainTime--
+            if (remainTime >= 0) {
+                RxBus.post(remainTime)
+            } else {
+                mTimeOutTimer.cancel()
+                stopSelf()
+                Log.Http.d("停止扫描")
+            }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         mMyIp = WifiUtils.getIpAddress()
@@ -92,6 +109,7 @@ class SyncBillsService : Service() {
             stopSelf()
             return
         }
+        startTimeOutTimer()
         val manager = this.getSystemService(Context.WIFI_SERVICE) as WifiManager
         mMulticastLock = manager.createMulticastLock("AABills Sync")
         mMulticastLock?.acquire()
@@ -160,8 +178,8 @@ class SyncBillsService : Service() {
 
             }
         })
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+        .subscribeOn(Schedulers.io())
+        .subscribe()
     }
 
     private fun isFromMyself(packet: AAPacket): Boolean {
@@ -178,6 +196,7 @@ class SyncBillsService : Service() {
             mRecvTask!!.dispose()
         }
         mSyncTimer.cancel()
+        mTimeOutTimer.cancel()
         mMulticastLock?.release()
     }
 

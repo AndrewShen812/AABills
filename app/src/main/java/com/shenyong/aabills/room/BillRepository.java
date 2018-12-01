@@ -1,6 +1,7 @@
 package com.shenyong.aabills.room;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Query;
 
 import com.sddy.baseui.dialog.MsgToast;
@@ -48,130 +49,20 @@ public class BillRepository {
         return mInstance;
     }
 
-    public User getUserBlocked(String userId) {
-        return mUserDao.findLocalUser(userId);
+    public List<BillRecord> getAllBillsBlocking() {
+        return mBillDao.getAllBills();
     }
 
-    @SuppressLint("CheckResult")
-    public void getAllBills(final BillsDataSource.LoadBillsCallback<BillRecord> callback) {
-        final List<BillRecord> bills = new ArrayList<>();
-        Observable.create(new ObservableOnSubscribe<BillRecord>() {
-            @Override
-            public void subscribe(ObservableEmitter<BillRecord> emitter) {
-                List<BillRecord> bills = mBillDao.getAllBills();
-                if (!ArrayUtils.isEmpty(bills)) {
-                    Collections.sort(bills, new Comparator<BillRecord>() {
-                        @Override
-                        public int compare(BillRecord o1, BillRecord o2) {
-                            if (o2.mBillTime > o1.mBillTime) {
-                                return 1;
-                            } else if (o2.mBillTime < o1.mBillTime) {
-                                return -1;
-                            }
-                            return 0;
-                        }
-                    });
-                    for (BillRecord billRecord : bills) {
-                        emitter.onNext(billRecord);
-                    }
-                }
-                emitter.onComplete();
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<BillRecord>() {
-                    @Override
-                    public void accept(BillRecord billRecord) {
-                        bills.add(billRecord);
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        throwable.printStackTrace();
-                        if (callback == null) {
-                            return;
-                        }
-                        if (bills.isEmpty()) {
-                            callback.onDataNotAvailable();
-                        } else {
-                            callback.onBillsLoaded(bills);
-                        }
-                    }
-                }, new Action() {
-                    @Override
-                    public void run() {
-                        if (callback == null) {
-                            return;
-                        }
-                        if (bills.isEmpty()) {
-                            callback.onDataNotAvailable();
-                        } else {
-                            callback.onBillsLoaded(bills);
-                        }
-                    }
-                });
+    public LiveData<List<BillRecord>> observeAllBills() {
+        return mBillDao.observeAllBills();
     }
 
-    @SuppressLint("CheckResult")
-    public void getBills(final long startTime, final long endTime, final BillsDataSource.LoadBillsCallback<BillRecord> callback) {
-        final List<BillRecord> bills = new ArrayList<>();
-        Observable.create(new ObservableOnSubscribe<BillRecord>() {
-                @Override
-                public void subscribe(ObservableEmitter<BillRecord> emitter) {
-                    List<BillRecord> bills = mBillDao.getBills(startTime, endTime);
-                    if (!ArrayUtils.isEmpty(bills)) {
-                        Collections.sort(bills, new Comparator<BillRecord>() {
-                            @Override
-                            public int compare(BillRecord o1, BillRecord o2) {
-                                if (o2.mBillTime > o1.mBillTime) {
-                                    return 1;
-                                } else if (o2.mBillTime < o1.mBillTime) {
-                                    return -1;
-                                }
-                                return 0;
-                            }
-                        });
-                        for (BillRecord billRecord : bills) {
-                            emitter.onNext(billRecord);
-                        }
-                    }
-                    emitter.onComplete();
-                }
-            })
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Consumer<BillRecord>() {
-                @Override
-                public void accept(BillRecord billRecord) {
-                    bills.add(billRecord);
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(Throwable throwable) {
-                    throwable.printStackTrace();
-                    if (callback == null) {
-                        return;
-                    }
-                    if (bills.isEmpty()) {
-                        callback.onDataNotAvailable();
-                    } else {
-                        callback.onBillsLoaded(bills);
-                    }
-                }
-            }, new Action() {
-                @Override
-                public void run() {
-                    if (callback == null) {
-                        return;
-                    }
-                    if (bills.isEmpty()) {
-                        callback.onDataNotAvailable();
-                    } else {
-                        callback.onBillsLoaded(bills);
-                    }
-                }
-            });
+    public LiveData<List<BillRecord>> observeBills(final long startTime, final long endTime) {
+        return mBillDao.observeBills(startTime, endTime);
+    }
+
+    public LiveData<List<CostType>> observeTypes() {
+        return mBillDao.getAddedCostTypes();
     }
 
     public void deleteBill(final String billId, final BillsDataSource.DelBillCallback callback) {

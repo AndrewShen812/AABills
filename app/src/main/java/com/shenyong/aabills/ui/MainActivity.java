@@ -1,6 +1,5 @@
 package com.shenyong.aabills.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -14,9 +13,6 @@ import com.sddy.baseui.dialog.MsgToast;
 import com.shenyong.aabills.AABilsApp;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.ui.user.UserCenterFragment;
-import com.shenyong.aabills.ui.viewmodel.MainViewModel;
-
-import io.reactivex.functions.Consumer;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -25,8 +21,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private BaseFragment mUserCenterFragment;
 
     private BaseFragment mCurrentFragment;
-
-    private MainViewModel mViewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,7 +34,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         mStatisticFragment = StatisticFragment.newInstance();
         mUserCenterFragment = UserCenterFragment.newInstance();
         mCurrentFragment = mAddBillFragment;
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
     }
 
     @Override

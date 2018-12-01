@@ -22,6 +22,8 @@
         android:checkedButton="@null"
         android:checked="@{data.checked}"
         android:background="@{data.mItemBg}"
+        android:layout_marginStart="@dimen/margin_large"
+        android:layout_marginEnd="@dimen/margin_large"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

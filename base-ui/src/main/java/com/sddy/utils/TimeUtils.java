@@ -80,4 +80,26 @@ public class TimeUtils {
         SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
         return sdf.format(date);
     }
+
+    private static final int MINUTE_SEC = 60;
+    private static final int HOUR_SEC = MINUTE_SEC * 60;
+    private static final int DAY_SEC = HOUR_SEC * 24;
+    public static String getDurationDesc(int durationSec) {
+        if (durationSec < MINUTE_SEC) {
+            return String.format(Locale.getDefault(), "00:%02d", durationSec);
+        } else if (durationSec < HOUR_SEC) {
+            int min = durationSec / MINUTE_SEC;
+            int sec = durationSec % MINUTE_SEC;
+            return String.format(Locale.getDefault(), "%02d:%02d", min, sec);
+        } else if (durationSec < DAY_SEC) {
+            int hour = durationSec / HOUR_SEC;
+            int min = (durationSec % HOUR_SEC) / MINUTE_SEC;
+            if (min == 0) {
+                return hour + "小时";
+            } else {
+                return hour + "小时" + min + "分钟";
+            }
+        }
+        return "";
+    }
 }

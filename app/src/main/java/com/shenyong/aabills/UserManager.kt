@@ -78,8 +78,8 @@ object UserManager {
             users.add(user)
             users.forEach {
                 it.isLastLogin = it.mUid == user.mUid
+                userDao.updateLastLogin(it.mUid, it.isLastLogin)
             }
-            userDao.updateLastLogin(users)
         }
             .compose(RxUtils.ioMainScheduler())
             .subscribe()

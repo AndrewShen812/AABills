@@ -1,11 +1,18 @@
 package com.shenyong.aabills.ui.viewmodel;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.ViewModel;
+import android.support.annotation.Nullable;
+
 import com.sddy.utils.TimeUtils;
 import com.shenyong.aabills.listdata.BillRecordData;
+import com.shenyong.aabills.room.BillDatabase;
 import com.shenyong.aabills.room.BillRecord;
 import com.shenyong.aabills.room.BillRepository;
 import com.shenyong.aabills.room.BillsDataSource;
 import com.shenyong.aabills.room.User;
+import com.shenyong.aabills.room.UserDao;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,74 +27,41 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class BillsListViewModel {
+public class BillsListViewModel extends ViewModel {
 
     private BillRepository mRepository;
+    public MutableLiveData<List<BillRecordData>> mListData = new MutableLiveData<>();
 
     public BillsListViewModel() {
         mRepository = BillRepository.getInstance();
     }
 
-    public interface BillsListLoadCallback {
-        void onComplete(List<BillRecordData> bills);
-    }
-
-    public void loadBills(final long startTime, long endTime, final BillsListLoadCallback callback) {
-        mRepository.getBills(startTime, endTime, new BillsDataSource.LoadBillsCallback<BillRecord>() {
+    public void observeBills(LifecycleOwner owner, final long startTime, long endTime) {
+        mRepository.observeBills(startTime, endTime).observe(owner, new android.arch.lifecycle.Observer<List<BillRecord>>() {
             @Override
-            public void onBillsLoaded(final List<BillRecord> bills) {
-                final List<BillRecordData> billsData = new ArrayList<>();
-                Observable.create(new ObservableOnSubscribe<BillRecordData>() {
+            public void onChanged(@Nullable final List<BillRecord> billRecords) {
+                Observable.create(new ObservableOnSubscribe<String>() {
                     @Override
-                    public void subscribe(ObservableEmitter<BillRecordData> emitter) throws Exception {
-                        Map<String, User> userMap = new HashMap<>();
-                        for (BillRecord bill : bills) {
-                            User user = userMap.get(bill.mUid);
-                            if (user == null) {
-                                user = mRepository.getUserBlocked(bill.mUid);
-                                userMap.put(bill.mUid, user);
-                            }
+                    public void subscribe(ObservableEmitter<String> emitter) throws Exception {
+                        UserDao userDao = BillDatabase.getInstance().userDao();
+                        List<BillRecordData> showList = new ArrayList<>();
+                        for (BillRecord bill : billRecords) {
+                            User user = userDao.findLocalUser(bill.mUid);
                             BillRecordData data = new BillRecordData();
                             data.mTime = TimeUtils.getTimeString(bill.mBillTime, "yyyy年MM月dd日")
-                            + "-" + user.mName;
+                                    + "-" + (user == null ? "佚名" : user.mName);
                             data.mType = "消费类型：" + bill.mType;
                             data.mAmount = String.format("%.1f元", bill.mAmount);
                             data.mRecordId = bill.mId;
-                            emitter.onNext(data);
+                            showList.add(data);
                         }
+                        mListData.postValue(showList);
+                        emitter.onNext("ok");
                         emitter.onComplete();
                     }
                 })
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<BillRecordData>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-
-                        }
-
-                        @Override
-                        public void onNext(BillRecordData billRecordData) {
-                            billsData.add(billRecordData);
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            if (callback != null) {
-                                callback.onComplete(billsData);
-                            }
-                        }
-                    });
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-
+                    .subscribeOn(Schedulers.io())
+                    .subscribe();
             }
         });
     }

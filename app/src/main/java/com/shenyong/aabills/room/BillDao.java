@@ -1,5 +1,6 @@
 package com.shenyong.aabills.room;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -9,6 +10,8 @@ import android.arch.persistence.room.Update;
 import java.util.List;
 
 import io.reactivex.Flowable;
+
+import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public interface BillDao {
@@ -25,8 +28,14 @@ public interface BillDao {
     @Query("select * from bill_record")
     List<BillRecord> getAllBills();
 
+    @Query("select * from bill_record")
+    LiveData<List<BillRecord>> observeAllBills();
+
     @Query("select * from bill_record where mBillTime >= :startTime and mBillTime < :endTime")
     List<BillRecord> getBills(long startTime, long endTime);
+
+    @Query("select * from bill_record where mBillTime >= :startTime and mBillTime < :endTime order by mBillTime desc")
+    LiveData<List<BillRecord>> observeBills(long startTime, long endTime);
 
     /**
      * 需要同步的账单，获取晚于某个时间、且不属于指定用户的账单，发送给局域网内的其他用户
@@ -42,4 +51,10 @@ public interface BillDao {
 
     @Update
     void updateBills(List<BillRecord> bills);
+
+    @Insert(onConflict = REPLACE)
+    void addCostType(CostType type);
+
+    @Query("select * from cost_type order by mAddTime asc")
+    LiveData<List<CostType>> getAddedCostTypes();
 }

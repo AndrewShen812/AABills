@@ -1,18 +1,26 @@
 package com.shenyong.aabills.ui;
 
 import android.app.DatePickerDialog;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.sddy.baseui.BaseBindingFragment;
+import com.sddy.baseui.dialog.MsgDialog;
 import com.sddy.baseui.dialog.MsgToast;
+import com.sddy.baseui.recycler.BaseHolder;
+import com.sddy.baseui.recycler.BaseHolderData;
 import com.sddy.baseui.recycler.DefaultItemDivider;
 import com.sddy.baseui.recycler.IItemClickLisntener;
 import com.sddy.baseui.recycler.databinding.SimpleBindingAdapter;
@@ -23,10 +31,12 @@ import com.sddy.utils.log.Log;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.databinding.FragmentAddBillBinding;
+import com.shenyong.aabills.listdata.AddTypeData;
 import com.shenyong.aabills.listdata.BillTypeData;
 import com.shenyong.aabills.room.BillDatabase;
 import com.shenyong.aabills.room.BillRecord;
 import com.shenyong.aabills.room.User;
+import com.shenyong.aabills.ui.viewmodel.AddBillsViewModel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,16 +52,18 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding>
-        implements IItemClickLisntener<BillTypeData> {
+        implements IItemClickLisntener<BaseHolderData> {
 
     public static AddBillsFragment newInstance() {
         return new AddBillsFragment();
     }
 
     private SimpleBindingAdapter mAdapter;
-    private List<BillTypeData> mTypeData = new ArrayList<>();
+    private List<BaseHolderData> mTypeData = new ArrayList<>();
+    private List<BillTypeData> mInnerTyps = new ArrayList<>();
     private BillRecord mBill = new BillRecord();
     private int mSelYear, mSelMonth, mSelDay;
+    private AddBillsViewModel mViewModel;
 
     @Override
     protected int getLayoutRes() {
@@ -68,30 +80,95 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
         for (String type : billTypes) {
             BillTypeData data = new BillTypeData(type);
             data.mClicklistener = this;
-            mTypeData.add(data);
+            mInnerTyps.add(data);
         }
+        mTypeData.addAll(mInnerTyps);
+        AddTypeData data = new AddTypeData();
+        data.mClicklistener = this;
+        mTypeData.add(data);
+
         mAdapter = new SimpleBindingAdapter();
         mBinding.rvAddBillTypes.setAdapter(mAdapter);
         mBinding.rvAddBillTypes.setLayoutManager(new GridLayoutManager(getContext(), 3));
         GradientDrawable drawable = ViewUtils.getDrawableBg(R.color.transparent);
         drawable.setSize(DimenUtils.dp2px(40), getResources().getDimensionPixelSize(R.dimen.margin_big));
-        DefaultItemDivider decoration = new DefaultItemDivider(getContext(), DefaultItemDivider.GRID);
+        DefaultItemDivider decoration = new DefaultItemDivider(getContext(), DividerItemDecoration.VERTICAL);
         decoration.setDrawable(drawable);
         mBinding.rvAddBillTypes.addItemDecoration(decoration);
         mAdapter.updateData(mTypeData);
 
         mBinding.tvAddBillDate.setText("选择日期");
+        mViewModel = ViewModelProviders.of(this).get(AddBillsViewModel.class);
+        mViewModel.getAddedTypes().observe(this, new Observer<List<BillTypeData>>() {
+            @Override
+            public void onChanged(@Nullable List<BillTypeData> types) {
+                mTypeData.clear();
+                mTypeData.addAll(mInnerTyps);
+                for (BillTypeData t : types) {
+                    t.mClicklistener = AddBillsFragment.this;
+                }
+                mTypeData.addAll(types);
+                AddTypeData data = new AddTypeData();
+                data.mClicklistener = AddBillsFragment.this;
+                mTypeData.add(data);
+                mAdapter.updateData(mTypeData);
+            }
+        });
+        mViewModel.observeTypes(this);
     }
 
     @Override
-    public void onClick(BillTypeData data, int position) {
-        data.checkStatusChanged();
-        mBill.mType = data.checked ? data.mDesc : mBill.mType;
-        for (BillTypeData typeData : mTypeData) {
-            if (typeData != data && data.checked) {
-                typeData.setChecked(false);
+    public void onClick(BaseHolderData data, int position) {
+        if (data instanceof BillTypeData) {
+            BillTypeData type = (BillTypeData) data;
+            type.checkStatusChanged();
+            mBill.mType = type.checked ? type.mDesc : mBill.mType;
+            for (BaseHolderData typeData : mTypeData) {
+                if (typeData instanceof BillTypeData) {
+                    if (typeData != data && ((BillTypeData) data).checked) {
+                        ((BillTypeData) typeData).setChecked(false);
+                    }
+                }
+            }
+        } else if (data instanceof AddTypeData) {
+            showAddType();
+        }
+    }
+
+    private void showAddType() {
+        MsgDialog dialog = new MsgDialog();
+        dialog.setTitle("添加类别");
+        final EditText etName = new EditText(getContext());
+        etName.setHint("类别（最多4个字）");
+        etName.setBackground(ViewUtils.getDrawableBg(R.color.input_name_bg, R.dimen.margin_small));
+        dialog.setContentView(etName);
+        dialog.setPositiveBtn(R.string.common_ok, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = etName.getText().toString().trim();
+                if (TextUtils.isEmpty(name)) {
+                    MsgToast.shortToast("类别不能为空");
+                    return;
+                } else if (name.length() > 4) {
+                    MsgToast.shortToast("类别名称不能太长哦");
+                    return;
+                } else if (typeExists(name)) {
+                    MsgToast.shortToast("该类别已经存在了");
+                    return;
+                }
+                mViewModel.addType(name);
+            }
+        });
+        dialog.show(getFragmentManager());
+    }
+
+    private boolean typeExists(String type) {
+        for (BaseHolderData t : mTypeData) {
+            if ( t instanceof BillTypeData && ((BillTypeData) t).mDesc.equals(type)) {
+                return true;
             }
         }
+        return false;
     }
 
     @Override
@@ -180,11 +257,13 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
     }
 
     private void clearUiData() {
-        for (BillTypeData typeData : mTypeData) {
-            typeData.setChecked(false);
+        for (BaseHolderData typeData : mTypeData) {
+            if (typeData instanceof BillTypeData) {
+                ((BillTypeData) typeData).setChecked(false);
+            }
         }
         mBinding.editText.setText("");
-        mBinding.tvAddBillDate.setText("");
+        mBinding.tvAddBillDate.setText("选择日期");
         mBill = new BillRecord();
     }
 }

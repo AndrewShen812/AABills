@@ -1,7 +1,10 @@
 package com.shenyong.aabills.ui;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
@@ -14,8 +17,11 @@ import com.sddy.utils.ViewUtils;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.databinding.ActivityStatisticDetailBinding;
 import com.shenyong.aabills.listdata.StatisticTypeData;
-import com.shenyong.aabills.ui.viewmodel.StatisticViewModel;
+import com.shenyong.aabills.ui.viewmodel.StatisticsDetailViewModel;
 
+/**
+ * 统计详情页面，图表和人均
+ */
 public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatisticDetailBinding> {
 
     private static final int TYPE_MONTH = 1;
@@ -29,7 +35,7 @@ public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatist
 
     private SimpleBindingAdapter mTypesAdapter;
     private SimpleBindingAdapter mCostAdapter;
-    private StatisticViewModel mStatModel;
+    private StatisticsDetailViewModel mStatModel;
     private int[] mColors;
     private String mTitle;
     private int mType;
@@ -67,8 +73,8 @@ public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatist
         mEndTime = data.getLong(KEY_END);
         mYear = data.getInt(KEY_YEAR);
         setContentView(R.layout.activity_statistic_detail);
+        mStatModel = ViewModelProviders.of(this).get(StatisticsDetailViewModel.class);
         initView();
-        mStatModel = new StatisticViewModel();
     }
 
     @Override
@@ -110,12 +116,9 @@ public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatist
                 R.color.type_color2,
                 R.color.type_color3,
                 R.color.type_color4};
-    }
-
-    private void loadData() {
-        mStatModel.loadStatisticData(mStartTime, mEndTime, new StatisticViewModel.LoadStatsticsCallback() {
+        mStatModel.mStatData.observe(this, new Observer<StatisticsDetailViewModel.StatData>() {
             @Override
-            public void onComplete(StatisticViewModel.StatData stat) {
+            public void onChanged(@Nullable StatisticsDetailViewModel.StatData stat) {
                 double[] percents = new double[stat.mTypesData.size()];
                 double total = 0;
                 for (int i = 0; i < percents.length; i++) {
@@ -138,5 +141,34 @@ public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatist
                 mCostAdapter.updateData(stat.mCostData);
             }
         });
+    }
+
+    private void loadData() {
+        mStatModel.observeStatisticData(this, mStartTime, mEndTime);
+//        mStatModel.loadStatisticData(mStartTime, mEndTime, new StatisticsDetailViewModel.LoadStatsticsCallback() {
+//            @Override
+//            public void onComplete(StatisticsDetailViewModel.StatData stat) {
+//                double[] percents = new double[stat.mTypesData.size()];
+//                double total = 0;
+//                for (int i = 0; i < percents.length; i++) {
+//                    StatisticTypeData data = stat.mTypesData.get(i);
+//                    percents[i] = data.mPercent;
+//                    data.mDotColor = mColors[i % mColors.length];
+//                    total += data.mAmount;
+//                }
+//                for (int i = 0; i < stat.mCostData.size(); i++) {
+//                    stat.mCostData.get(i).mColorRes = mColors[i % mColors.length];
+//                }
+//                mBindings.csvStatistic.setData(percents);
+//                mBindings.csvStatistic.setCenterText(String.format("%.1f", total));
+//                mTypesAdapter.updateData(stat.mTypesData);
+//                if (mType == TYPE_MONTH) {
+//                    mBindings.tvStatisticAvgCost.setText(getString(R.string.statistic_month_avg, stat.mAvgCost));
+//                } else if (mType == TYPE_YEAR) {
+//                    mBindings.tvStatisticAvgCost.setText(getString(R.string.statistic_year_avg, stat.mAvgCost));
+//                }
+//                mCostAdapter.updateData(stat.mCostData);
+//            }
+//        });
     }
 }

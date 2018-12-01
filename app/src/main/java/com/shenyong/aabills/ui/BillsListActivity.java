@@ -1,6 +1,9 @@
 package com.shenyong.aabills.ui;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.sddy.baseui.BaseActivity;
@@ -62,7 +65,18 @@ public class BillsListActivity extends BaseListActivity implements IItemClickLis
         setTitle(mTitle);
         setTitleBackIcon(R.drawable.ic_nav_back, R.color.white);
 
-        mViewModel = new BillsListViewModel();
+        mViewModel = ViewModelProviders.of(this).get(BillsListViewModel.class);
+        mViewModel.mListData.observe(this, new Observer<List<BillRecordData>>() {
+            @Override
+            public void onChanged(@Nullable List<BillRecordData> bills) {
+                for (BillRecordData data : bills) {
+                    data.mLongClickListener = BillsListActivity.this;
+                }
+                mListData.clear();
+                mListData.addAll(bills);
+                updateData(bills);
+            }
+        });
     }
 
     @Override
@@ -72,17 +86,8 @@ public class BillsListActivity extends BaseListActivity implements IItemClickLis
     }
 
     private void loadData() {
-        mViewModel.loadBills(mStartTime, mEndTime, new BillsListViewModel.BillsListLoadCallback() {
-            @Override
-            public void onComplete(List<BillRecordData> bills) {
-                for (BillRecordData data : bills) {
-                    data.mLongClickListener = BillsListActivity.this;
-                }
-                mListData.clear();
-                mListData.addAll(bills);
-                updateData(bills);
-            }
-        });
+        // TODO 2018/12/1: 数据分页
+        mViewModel.observeBills(this, mStartTime, mEndTime);
     }
 
     @Override

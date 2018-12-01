@@ -1,19 +1,18 @@
 package com.shenyong.aabills.ui.viewmodel;
 
-import android.annotation.SuppressLint;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModel;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.sddy.utils.ArrayUtils;
-import com.shenyong.aabills.UserManager;
-import com.shenyong.aabills.api.API;
-import com.shenyong.aabills.api.MobService;
-import com.shenyong.aabills.api.bean.LoginResult;
-import com.shenyong.aabills.api.bean.MobResponse;
 import com.shenyong.aabills.listdata.StatisticTypeData;
 import com.shenyong.aabills.listdata.UserCostData;
 import com.shenyong.aabills.room.BillDatabase;
 import com.shenyong.aabills.room.BillRecord;
 import com.shenyong.aabills.room.BillRepository;
-import com.shenyong.aabills.room.BillsDataSource;
 import com.shenyong.aabills.room.User;
 import com.shenyong.aabills.room.UserDao;
 
@@ -27,18 +26,18 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
-public class StatisticViewModel {
+public class StatisticsDetailViewModel extends ViewModel {
 
     public class StatData {
-        public List<StatisticTypeData> mTypesData;
-        public List<UserCostData> mCostData;
+        public List<StatisticTypeData> mTypesData = new ArrayList<>();
+        public List<UserCostData> mCostData = new ArrayList<>();
         public double mAvgCost;
     }
+
+    public MutableLiveData<StatData> mStatData = new MutableLiveData<>();
 
     public interface LoadStatsticsCallback {
         void onComplete(StatData stat);
@@ -47,39 +46,33 @@ public class StatisticViewModel {
 
     private BillRepository mBillRepository;
 
-    public StatisticViewModel() {
+    public StatisticsDetailViewModel() {
         mBillRepository = BillRepository.getInstance();
     }
 
-    public void loadStatisticData(final long startTime, long endTime, final LoadStatsticsCallback callback) {
-        mBillRepository.getBills(startTime, endTime, new BillsDataSource.LoadBillsCallback<BillRecord>() {
-            @SuppressLint("CheckResult")
+    public void observeStatisticData(LifecycleOwner owner, final long startTime, long endTime) {
+        mBillRepository.observeBills(startTime, endTime).observe(owner, new Observer<List<BillRecord>>() {
             @Override
-            public void onBillsLoaded(final List<BillRecord> bills) {
-                Observable.create(new ObservableOnSubscribe<StatData>() {
+            public void onChanged(@Nullable final List<BillRecord> billRecords) {
+                if (billRecords == null) {
+                    mStatData.setValue(new StatData());
+                    return;
+                }
+                Observable.create(new ObservableOnSubscribe<List<BillRecord>>() {
                     @Override
-                    public void subscribe(ObservableEmitter<StatData> emitter) throws Exception {
-                        if (ArrayUtils.isEmpty(bills)) {
-                            return;
-                        }
-                        emitter.onNext(calcStatData(bills));
+                    public void subscribe(ObservableEmitter<List<BillRecord>> emitter) throws Exception {
+                        emitter.onNext(billRecords);
                     }
                 })
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Consumer<StatData>() {
-                        @Override
-                        public void accept(StatData statData) throws Exception {
-                            if (callback != null) {
-                                callback.onComplete(statData);
-                            }
-                        }
-                    });
-
-            }
-
-            @Override
-            public void onDataNotAvailable() {
+                .map(new Function<List<BillRecord>, String>() {
+                    @Override
+                    public String apply(List<BillRecord> billRecords) throws Exception {
+                        mStatData.postValue(calcStatData(billRecords));
+                        return "ok";
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribe();
             }
         });
     }
@@ -89,7 +82,12 @@ public class StatisticViewModel {
         Map<String, UserCostData> costMap = new HashMap<>();
         double total = 0;
         UserDao userDao = BillDatabase.getInstance().userDao();
-        User loginUser = UserManager.INSTANCE.getUser();
+        List<User> allUsers = userDao.queryAllUsers();
+        for (User u : allUsers) {
+            UserCostData cost = new UserCostData();
+            cost.mName = TextUtils.isEmpty(u.mName) ? "佚名" : u.mName;
+            costMap.put(u.mUid, cost);
+        }
         for (BillRecord bill : bills) {
             StatisticTypeData type = typesMap.get(bill.mType);
             if (type == null) {
@@ -105,7 +103,7 @@ public class StatisticViewModel {
                 cost = new UserCostData();
                 costMap.put(bill.mUid, cost);
                 User user = userDao.findLocalUser(bill.mUid);
-                cost.mName = user == null ? "本机" : user.mName;
+                cost.mName = user == null ? "佚名" : user.mName;
             }
             cost.mCost += bill.mAmount;
         }

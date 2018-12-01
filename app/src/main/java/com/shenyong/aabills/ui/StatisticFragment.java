@@ -1,5 +1,6 @@
 package com.shenyong.aabills.ui;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -26,8 +27,7 @@ import com.sddy.utils.log.Log;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.listdata.BillRecordData;
 import com.shenyong.aabills.listdata.EmptyData;
-import com.shenyong.aabills.room.BillsDataSource;
-import com.shenyong.aabills.ui.viewmodel.BillStatisticsViewModel;
+import com.shenyong.aabills.ui.viewmodel.StatisticsViewModel;
 import com.shenyong.aabills.view.BottomPickerWrapper;
 
 import java.text.ParseException;
@@ -43,11 +43,11 @@ public class StatisticFragment extends BaseFragment {
     private RecyclerView mRvRecordList;
     private SimpleBindingAdapter mAdapter;
     private List<BaseHolderData> mListData = new ArrayList<>();
-    private BillStatisticsViewModel mViewModel;
+    private StatisticsViewModel mViewModel;
     private IItemClickLisntener<BillRecordData> mClickListener = new IItemClickLisntener<BillRecordData>() {
         @Override
         public void onClick(final BillRecordData data, int position) {
-            SimpleDateFormat sdf = new SimpleDateFormat(BillStatisticsViewModel.PATTERN_MONTH);
+            SimpleDateFormat sdf = new SimpleDateFormat(StatisticsViewModel.PATTERN_MONTH);
             Date date = null;
             try {
                 date = sdf.parse(data.mTime);
@@ -72,7 +72,7 @@ public class StatisticFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(BillStatisticsViewModel.class);
+        mViewModel = ViewModelProviders.of(this).get(StatisticsViewModel.class);
     }
 
     @Override
@@ -118,6 +118,22 @@ public class StatisticFragment extends BaseFragment {
         drawable.setSize(size, size);
         decoration.setDrawable(drawable);
         mRvRecordList.addItemDecoration(decoration);
+        mViewModel.mStatisticList.observe(this, new Observer<List<BillRecordData>>() {
+            @Override
+            public void onChanged(@Nullable List<BillRecordData> billRecordData) {
+                mListData.clear();
+                if (ArrayUtils.isEmpty(billRecordData)) {
+                    EmptyData emptyData = new EmptyData();
+                    mListData.add(emptyData);
+                } else {
+                    for (BillRecordData recordData : billRecordData) {
+                        recordData.mClicklistener = mClickListener;
+                    }
+                    mListData.addAll(billRecordData);
+                }
+                mAdapter.updateData(mListData);
+            }
+        });
     }
 
     @Override
@@ -136,25 +152,7 @@ public class StatisticFragment extends BaseFragment {
 
     private void updateList() {
         mListData.clear();
-        mViewModel.loadBills(new BillsDataSource.LoadBillsCallback<BillRecordData>() {
-            @Override
-            public void onBillsLoaded(List<BillRecordData> bills) {
-                for (BillRecordData recordData : bills) {
-                    recordData.mClicklistener = mClickListener;
-                    mListData.add(recordData);
-                }
-                mAdapter.updateData(mListData);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                if (ArrayUtils.isEmpty(mListData)) {
-                    EmptyData emptyData = new EmptyData();
-                    mListData.add(emptyData);
-                }
-                mAdapter.updateData(mListData);
-            }
-        });
+        mViewModel.observeAllBills(this);
     }
 
     private void showCustomTimePick() {

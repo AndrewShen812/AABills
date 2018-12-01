@@ -131,25 +131,35 @@
             <TextView
                 android:id="@+id/tv_user_center_sync"
                 style="@style/TextDefBlack"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_large"
                 android:gravity="center_vertical"
                 android:text="同步好友数据" />
 
-        </android.support.v7.widget.CardView>
+            <TextView
+                android:id="@+id/tv_user_center_sync_time"
+                style="@style/TextDefGray"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="@dimen/margin_large"
+                android:gravity="center_vertical"
+                tools:text="00:59" />
 
+        </android.support.v7.widget.CardView>
+<!--发现局域网内的其他用户，并尝试同步其他用户的数据到本机上。如1分钟内未发现其他用户，将停止同步服务。（建议同步前先邀请好友上线）-->
         <TextView
             android:id="@+id/tv_user_center_sync_desc"
             style="@style/TextSmallGray"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_large"
-            android:layout_marginTop="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_mid"
             android:layout_marginEnd="@dimen/margin_large"
             android:gravity="center_vertical"
             android:paddingEnd="@dimen/margin_large"
-            android:text="发现局域网内的其他用户，并尝试同步其他用户的数据到本机上。如1分钟内未发现其他用户，将停止同步服务。（建议同步前先邀请好友上线）"
+            android:text="扫描局域网内的其他用户，并尝试同步其他用户的数据到本机上。扫描时间1分钟，避免持续运行消耗电量。"
             app:layout_constraintTop_toBottomOf="@id/cv_user_center_sync"/>
 
         <Button
