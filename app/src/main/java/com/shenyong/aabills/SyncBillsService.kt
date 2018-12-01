@@ -11,6 +11,7 @@ import com.shenyong.aabills.UserManager.user
 import com.shenyong.aabills.api.AAObserver
 import com.shenyong.aabills.room.BillDatabase
 import com.shenyong.aabills.room.BillRecord
+import com.shenyong.aabills.room.User
 import com.shenyong.aabills.room.UserSyncRecord
 import com.shenyong.aabills.sync.AAPacket
 import com.shenyong.aabills.utils.RxTimer
@@ -49,6 +50,7 @@ class SyncBillsService : Service() {
         private const val PACK_PREFIX = "aabillsSync"
         // https://baike.baidu.com/item/%E7%BB%84%E6%92%AD%E5%9C%B0%E5%9D%80/6095039?fr=aladdin
         private const val GROUP_IP = "224.0.0.251"
+//        private const val GROUP_IP = "238.255.255.1"
 
         fun startService() {
             val context = AABilsApp.getInstance().applicationContext
@@ -223,6 +225,7 @@ class SyncBillsService : Service() {
             data.dstUid = dstUid
             data.data = JSON.toJSONString(it)
             Thread.sleep(20)
+            Log.Http.d("账单排队：${JSON.toJSONString(data)}")
             enqueueData(data, true)
         }
     }
@@ -232,6 +235,12 @@ class SyncBillsService : Service() {
             val billDao = BillDatabase.getInstance().billDao()
             val bill = JSON.parseObject(packet.data, BillRecord::class.java)
             billDao.insertBill(bill)
+            val userDao = BillDatabase.getInstance().userDao()
+            // 如果是第一次添加该好友的账单，先获取一下该用户的资料
+            val u = userDao.findLocalUser(bill.mUid)
+            if (u == null) {
+                UserManager.addLanUser(bill.mUid)
+            }
         }
             .subscribeOn(Schedulers.io())
             .subscribe(object : AAObserver<String>() {

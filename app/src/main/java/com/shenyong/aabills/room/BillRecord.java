@@ -2,6 +2,7 @@ package com.shenyong.aabills.room;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
@@ -29,6 +30,10 @@ public class BillRecord {
     public long mAddTime;
     @ColumnInfo
     public String mUid;
+
+    /** 同步账单用 */
+    @Ignore
+    public String mPhone;
 
     public void generateId() {
         mId = UUID.randomUUID().toString();

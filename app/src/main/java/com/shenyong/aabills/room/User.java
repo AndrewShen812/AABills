@@ -37,7 +37,7 @@ public class User {
     @NonNull
     @ColumnInfo
     @ColorInt
-    public int mIconBg;
+    public int mHeadBg;
 
     @Ignore
     public boolean isLogin;
@@ -48,6 +48,10 @@ public class User {
 
     public User(String mName) {
         this.mName = mName;
+        mPhone = "";
+        mPwd = "";
+        mHeadBg = 0x2A82E4;
+        isLastLogin = false;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class User {
                 ", mName='" + mName + '\'' +
                 ", mPhone='" + mPhone + '\'' +
                 ", mPwd='" + mPwd + '\'' +
-                ", mIconBg=" + mIconBg +
+                ", mHeadBg=" + mHeadBg +
                 ", isLogin=" + isLogin +
                 ", isLastLogin=" + isLastLogin +
                 '}';

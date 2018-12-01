@@ -49,7 +49,7 @@ public class BillRepository {
     }
 
     public User getUserBlocked(String userId) {
-        return mUserDao.queryUser(userId);
+        return mUserDao.findLocalUser(userId);
     }
 
     @SuppressLint("CheckResult")

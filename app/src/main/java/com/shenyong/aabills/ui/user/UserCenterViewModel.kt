@@ -3,16 +3,20 @@ package com.shenyong.aabills.ui.user
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.shapes.Shape
 import android.util.Base64
+import com.alibaba.fastjson.JSON
+import com.sddy.baseui.dialog.MsgToast
 import com.sddy.utils.DimenUtils
 import com.sddy.utils.ViewUtils
+import com.sddy.utils.log.Log
 import com.shenyong.aabills.AABilsApp
 import com.shenyong.aabills.R
 import com.shenyong.aabills.UserManager
 import com.shenyong.aabills.api.API
 import com.shenyong.aabills.api.MobService
+import com.shenyong.aabills.api.UserService
 import com.shenyong.aabills.api.bean.MobResponse
+import com.shenyong.aabills.api.bean.UserProfile
 import com.shenyong.aabills.room.BillDatabase
 import com.shenyong.aabills.room.User
 import io.reactivex.Observable
@@ -29,11 +33,9 @@ import io.reactivex.schedulers.Schedulers
  */
 class UserCenterViewModel : ViewModel() {
 
-    companion object {
-        const val NAME_AND_BG = "name_bg"
-    }
-
     val userName = MutableLiveData<String>()
+
+    val phone = MutableLiveData<String>()
 
     val headBg = MutableLiveData<GradientDrawable>()
 
@@ -52,11 +54,12 @@ class UserCenterViewModel : ViewModel() {
             userName.value = "本机"
             return
         }
-        headColor = if (user.mIconBg == 0) headColor else user.mIconBg
+        phone.value = user.mPhone
+        headColor = if (user.mHeadBg == 0) headColor else user.mHeadBg
         updateHeadBg(headColor)
         userName.value = user.nickName
         // 加载本地存的设置
-        /*Observable.create<User> {
+        Observable.create<User> {
             val userDao = BillDatabase.getInstance().userDao()
             val localUser = userDao.findLocalUser(user.mUid)
             it.onNext(localUser)
@@ -73,15 +76,15 @@ class UserCenterViewModel : ViewModel() {
                 }
 
                 override fun onNext(t: User) {
-                    headColor = t.mIconBg
-                    headBg.value?.setColor(t.mIconBg)
+                    headColor = t.mHeadBg
+                    headBg.value?.setColor(t.mHeadBg)
                     userName.value = t.mName
                 }
 
                 override fun onError(e: Throwable) {
                 }
-            })*/
-        API.mobApi.getUserProfile(MobService.get_PROFILE, MobService.KEY, user.mUid, NAME_AND_BG)
+            })
+        UserService.getUserProfile(user.mUid)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<MobResponse<String>> {
@@ -93,11 +96,19 @@ class UserCenterViewModel : ViewModel() {
 
                     override fun onNext(t: MobResponse<String>) {
                         if (t.isSuccess() && !t.result.isNullOrEmpty()) {
-                            // 保存格式：name&argb
-                            val v = String(Base64.decode(t.result ?: "", Base64.NO_WRAP)).split("&")
-                            userName.value = v?.get(0)
-                            headColor = v?.get(1)!!.toInt()
-                            updateHeadBg(headColor)
+                            try {
+                                val v = String(Base64.decode(t.result ?: "", Base64.NO_WRAP))
+                                Log.Http.d("${user.mPhone}-${user.mName} info:$v")
+                                val profile = JSON.parseObject(v, UserProfile::class.java)
+                                userName.value = profile.nickname
+                                headColor = profile.headColor
+                                updateHeadBg(headColor)
+                                user.mName = profile.nickname
+                                user.mHeadBg = profile.headColor
+                                UserManager.saveLocal()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
                     }
 
@@ -125,25 +136,28 @@ class UserCenterViewModel : ViewModel() {
         val validName = if (name.length > 2) name.substring(0, 2) else name
         userName.value = validName
         user.mName = validName
-        val nameBg = validName + "&" + headColor.toString()
-        val encode = Base64.encodeToString(nameBg.toByteArray(), Base64.NO_WRAP)
-        API.mobApi.setUserProfile(MobService.get_PROFILE, MobService.KEY, user.mToken, user.mUid,
-                NAME_AND_BG, encode)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<MobResponse<String>> {
-                    override fun onComplete() {
-                    }
+        user.mHeadBg = headColor
+        UserManager.saveLocal()
+        val profile = UserProfile(headColor, validName)
+        val encode = Base64.encodeToString(JSON.toJSONString(profile).toByteArray(), Base64.NO_WRAP)
+        UserService.setUserProfile(user.mToken, user.mUid, encode)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<MobResponse<String>> {
+                override fun onComplete() {
+                }
 
-                    override fun onSubscribe(d: Disposable) {
-                    }
+                override fun onSubscribe(d: Disposable) {
+                }
 
-                    override fun onNext(t: MobResponse<String>) {
+                override fun onNext(t: MobResponse<String>) {
+                    if (t.isSuccess()) {
+                        MsgToast.shortToast("保存成功")
                     }
+                }
 
-                    override fun onError(e: Throwable) {
-                    }
-
-                })
+                override fun onError(e: Throwable) {
+                }
+            })
     }
 }

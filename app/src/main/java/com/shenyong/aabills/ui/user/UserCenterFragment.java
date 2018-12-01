@@ -35,6 +35,7 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
         setBackBtnVisible(false);
         mViewModel = ViewModelProviders.of(this).get(UserCenterViewModel.class);
         mBinding.setModel(mViewModel);
+        mBinding.setLifecycleOwner(this);
         mBinding.setPresenter(this);
     }
 

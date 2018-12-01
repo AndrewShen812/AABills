@@ -8,6 +8,8 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+
 @Dao
 public interface UserDao {
 
@@ -16,9 +18,6 @@ public interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void updateLastLogin(List<User> users);
-
-    @Query("select * from user where mName = :name")
-    User queryUser(String name);
 
     @Query("select * from user where mUid = :id")
     User findLocalUser(String id);

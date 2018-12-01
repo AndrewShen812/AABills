@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.view.View;
 
+import com.alibaba.fastjson.JSON;
 import com.sddy.baseui.BaseBindingActivity;
 import com.sddy.baseui.dialog.MsgToast;
 import com.sddy.utils.ViewUtils;
@@ -12,7 +13,9 @@ import com.shenyong.aabills.R;
 import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.api.API;
 import com.shenyong.aabills.api.MobService;
+import com.shenyong.aabills.api.UserService;
 import com.shenyong.aabills.api.bean.MobResponse;
+import com.shenyong.aabills.api.bean.UserProfile;
 import com.shenyong.aabills.databinding.ActivityHeadSettingBinding;
 import com.shenyong.aabills.room.User;
 import com.shenyong.aabills.utils.DrawableUtils;
@@ -52,7 +55,7 @@ public class HeadSettingActivity extends BaseBindingActivity<ActivityHeadSetting
 
         mPreviewBg = DrawableUtils.getCircleDrawable(R.color.main_blue, R.dimen.circle_head_size);
         User user = UserManager.INSTANCE.getUser();
-        mSelColor = user.mIconBg != 0 ? user.mIconBg : mSelColor;
+        mSelColor = user.mHeadBg != 0 ? user.mHeadBg : mSelColor;
         mPreviewBg.setColor(mSelColor);
         mBindings.tvHeadSettingPreview.setText(user.getNickName());
         mBindings.tvHeadSettingPreview.setBackground(mPreviewBg);
@@ -85,12 +88,10 @@ public class HeadSettingActivity extends BaseBindingActivity<ActivityHeadSetting
 
     private void saveSetting() {
         User user = UserManager.INSTANCE.getUser();
-        user.mIconBg = mSelColor;
-        String nameBg = user.getNickName() + "&" + Integer.toString(mSelColor);
-        String encode = Base64.encodeToString(nameBg.getBytes(), Base64.NO_WRAP);
-        API.Companion.getMobApi()
-                .setUserProfile(MobService.PUT_PROFILE, MobService.KEY, user.mToken,
-                        user.mUid, UserCenterViewModel.NAME_AND_BG, encode)
+        user.mHeadBg = mSelColor;
+        UserProfile profile = new UserProfile(mSelColor, user.mName);
+        String encode = Base64.encodeToString(JSON.toJSONString(profile).getBytes(), Base64.NO_WRAP);
+        UserService.INSTANCE.setUserProfile(user.mToken, user.mUid, encode)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<MobResponse<String>>() {

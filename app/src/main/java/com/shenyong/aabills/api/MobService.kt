@@ -23,6 +23,7 @@ interface MobService {
         const val PUT_PROFILE = "profile/put"
         const val get_PROFILE = "profile/query"
         const val CHANGE_PWD = /*BASE_URL + */"password/change"
+        const val KEY_USERPROFILE = "user_info"
     }
 
     @GET
