@@ -18,8 +18,8 @@
             android:layout_height="75dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/rv_statistic_types_detail"
-            app:layout_constraintBottom_toBottomOf="@id/rv_statistic_types_detail"/>
+            app:layout_constraintEnd_toStartOf="@+id/rv_statistic_types_detail"
+            app:layout_constraintBottom_toBottomOf="@+id/rv_statistic_types_detail"/>
         
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_statistic_types_detail"

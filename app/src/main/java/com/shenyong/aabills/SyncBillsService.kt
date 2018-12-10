@@ -11,7 +11,6 @@ import com.shenyong.aabills.UserManager.user
 import com.shenyong.aabills.api.AAObserver
 import com.shenyong.aabills.room.BillDatabase
 import com.shenyong.aabills.room.BillRecord
-import com.shenyong.aabills.room.User
 import com.shenyong.aabills.room.UserSyncRecord
 import com.shenyong.aabills.sync.AAPacket
 import com.shenyong.aabills.utils.RxBus
@@ -25,7 +24,6 @@ import java.io.IOException
 import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.MulticastSocket
-import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 
@@ -39,7 +37,7 @@ class SyncBillsService : Service() {
     private var mRecvTask: Disposable? = null
     private var mSendSocket: MulticastSocket? = null
     private var mRecvSocket: MulticastSocket? = null
-    private val mSendQueue = LinkedBlockingQueue<ByteArray>(100)
+    private val mSendQueue = LinkedBlockingQueue<ByteArray>()
     private val mSyncTimer = RxTimer()
     private val mTimeOutTimer = RxTimer()
     // 组播地址
@@ -204,6 +202,9 @@ class SyncBillsService : Service() {
      * 处理接收到的同步请求，检查是否有需要发送给对方的账单
      */
     private fun handleSyncRequest(packet: AAPacket) {
+        if (packet.orgUid.isNullOrEmpty()) {
+            return
+        }
         val user = UserManager.user
         Observable.create<String> {
             val userDao = BillDatabase.getInstance().userDao()
@@ -211,18 +212,15 @@ class SyncBillsService : Service() {
             val syncRecord = userDao.getSyncRecord(user.mUid, packet.orgUid)
             var bills = if (syncRecord == null) {
                 // 同步全部
-                billDao.getNeedSyncBills(packet.orgUid)
+                billDao.getNeedSyncBills()
             } else {
                 // 部分同步
-                billDao.getNeedSyncBills(syncRecord.mLastSentBillAddTime, packet.orgUid)
+                billDao.getNeedSyncBills(syncRecord.mLastSentBillAddTime)
             }
             if (bills.isNotEmpty()) {
                 sendBills(bills, packet.orgIp, packet.orgUid)
                 // 更新本机的同步记录
-                val bill = bills.last()
-                bills.sortWith(Comparator { b1, b2 ->
-                    return@Comparator (b1.mAddTime - b2.mAddTime).toInt()
-                })
+                val bill = bills.first()
                 val syncRecord = UserSyncRecord()
                 syncRecord.mMyUid = user.mUid
                 syncRecord.mLANUid = packet.orgUid

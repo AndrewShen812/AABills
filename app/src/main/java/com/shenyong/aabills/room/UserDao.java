@@ -1,6 +1,7 @@
 package com.shenyong.aabills.room;
 
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
@@ -36,5 +37,8 @@ public interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void updateSyncRecord(UserSyncRecord record);
+
+    @Delete
+    void delSyncRecord(UserSyncRecord record);
 }
 

@@ -11,16 +11,26 @@ import java.util.List;
 
 import io.reactivex.Flowable;
 
+import static android.arch.persistence.room.OnConflictStrategy.IGNORE;
 import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public interface BillDao {
 
-    @Insert
+    @Insert(onConflict = IGNORE)
     void insertBill(BillRecord billRecord);
+
+    @Insert(onConflict = REPLACE)
+    void insertBills(List<BillRecord> billRecord);
 
     @Delete()
     void deleteBill(BillRecord billRecord);
+
+    @Delete()
+    void deleteBills(List<BillRecord> bills);
+
+    @Query("select *  from bill_record where mBillTime <= 1539446399359")
+    List<BillRecord> getOldBills();
 
     @Query("select * from bill_record where mId = :billId")
     BillRecord queryBill(String billId);
@@ -40,11 +50,15 @@ public interface BillDao {
     /**
      * 需要同步的账单，获取晚于某个时间、且不属于指定用户的账单，发送给局域网内的其他用户
      */
-    @Query("select * from bill_record where mAddTime > :lastTime and mUid != :exceptUid")
-    List<BillRecord> getNeedSyncBills(long lastTime, String exceptUid);
+//    @Query("select * from bill_record where mAddTime > :lastTime and mUid != :exceptUid order by mAddTime desc")
+//    List<BillRecord> getNeedSyncBills(long lastTime, String exceptUid);
+    @Query("select * from bill_record where mAddTime > :lastTime order by mAddTime desc")
+    List<BillRecord> getNeedSyncBills(long lastTime);
 
-    @Query("select * from bill_record where mUid != :exceptUid")
-    List<BillRecord> getNeedSyncBills(String exceptUid);
+//    @Query("select * from bill_record where mUid != :exceptUid order by mAddTime desc")
+//    List<BillRecord> getNeedSyncBills(String exceptUid);
+    @Query("select * from bill_record order by mAddTime desc")
+    List<BillRecord> getNeedSyncBills();
 
     @Query("select * from bill_record where mUid is null")
     List<BillRecord> getNoUidBills();

@@ -1,6 +1,10 @@
 package com.shenyong.aabills.ui;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import com.sddy.baseui.BaseActivity;
 import com.shenyong.aabills.R;
@@ -20,6 +24,19 @@ public class StartupActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
+            } else {
+                showMain();
+            }
+        } else {
+            showMain();
+        }
+    }
+
+    private void showMain() {
         findViewById(R.id.ll_start_up_name).postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -27,5 +44,12 @@ public class StartupActivity extends BaseActivity {
                 finish();
             }
         }, 2000);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]
+            grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        showMain();
     }
 }

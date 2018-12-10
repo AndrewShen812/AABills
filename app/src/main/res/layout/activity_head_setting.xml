@@ -29,9 +29,9 @@
             android:text="@string/head_setting_sel_color"
             style="@style/TextDefBlack"
             android:layout_marginStart="@dimen/margin_large"
-            app:layout_constraintTop_toTopOf="@id/view_head_seeting_bg"
-            app:layout_constraintBottom_toTopOf="@id/view_head_seeting_div"
-            app:layout_constraintStart_toStartOf="@id/view_head_seeting_bg" />
+            app:layout_constraintTop_toTopOf="@+id/view_head_seeting_bg"
+            app:layout_constraintBottom_toTopOf="@+id/view_head_seeting_div"
+            app:layout_constraintStart_toStartOf="@+id/view_head_seeting_bg" />
 
         <View
             android:id="@+id/view_head_setting_cyan"
@@ -40,9 +40,9 @@
             android:background="@drawable/shape_dot"
             android:layout_marginEnd="@dimen/margin_20dp"
             android:onClick="@{(v)->presenter.onClick(v)}"
-            app:layout_constraintTop_toTopOf="@id/view_head_seeting_bg"
-            app:layout_constraintBottom_toTopOf="@id/view_head_seeting_div"
-            app:layout_constraintEnd_toEndOf="@id/view_head_seeting_bg" />
+            app:layout_constraintTop_toTopOf="@+id/view_head_seeting_bg"
+            app:layout_constraintBottom_toTopOf="@+id/view_head_seeting_div"
+            app:layout_constraintEnd_toEndOf="@+id/view_head_seeting_bg" />
 
         <View
             android:id="@+id/view_head_setting_red"
@@ -51,9 +51,9 @@
             android:background="@drawable/shape_dot"
             android:layout_marginEnd="@dimen/margin_large"
             android:onClick="@{(v)->presenter.onClick(v)}"
-            app:layout_constraintTop_toTopOf="@id/view_head_seeting_bg"
-            app:layout_constraintBottom_toTopOf="@id/view_head_seeting_div"
-            app:layout_constraintEnd_toStartOf="@id/view_head_setting_cyan" />
+            app:layout_constraintTop_toTopOf="@+id/view_head_seeting_bg"
+            app:layout_constraintBottom_toTopOf="@+id/view_head_seeting_div"
+            app:layout_constraintEnd_toStartOf="@+id/view_head_setting_cyan" />
 
         <View
             android:id="@+id/view_head_setting_yellow"
@@ -62,9 +62,9 @@
             android:background="@drawable/shape_dot"
             android:layout_marginEnd="@dimen/margin_large"
             android:onClick="@{(v)->presenter.onClick(v)}"
-            app:layout_constraintTop_toTopOf="@id/view_head_seeting_bg"
-            app:layout_constraintBottom_toTopOf="@id/view_head_seeting_div"
-            app:layout_constraintEnd_toStartOf="@id/view_head_setting_red" />
+            app:layout_constraintTop_toTopOf="@+id/view_head_seeting_bg"
+            app:layout_constraintBottom_toTopOf="@+id/view_head_seeting_div"
+            app:layout_constraintEnd_toStartOf="@+id/view_head_setting_red" />
 
         <View
             android:id="@+id/view_head_setting_blue"
@@ -73,9 +73,9 @@
             android:background="@drawable/shape_dot"
             android:layout_marginEnd="@dimen/margin_large"
             android:onClick="@{(v)->presenter.onClick(v)}"
-            app:layout_constraintTop_toTopOf="@id/view_head_seeting_bg"
-            app:layout_constraintBottom_toTopOf="@id/view_head_seeting_div"
-            app:layout_constraintEnd_toStartOf="@id/view_head_setting_yellow" />
+            app:layout_constraintTop_toTopOf="@+id/view_head_seeting_bg"
+            app:layout_constraintBottom_toTopOf="@+id/view_head_seeting_div"
+            app:layout_constraintEnd_toStartOf="@+id/view_head_setting_yellow" />
 
         <View
             android:id="@+id/view_head_seeting_div"
@@ -83,9 +83,9 @@
             android:layout_height="0.5dp"
             android:background="@color/line_gray"
             android:layout_marginTop="60dp"
-            app:layout_constraintTop_toTopOf="@id/view_head_seeting_bg"
-            app:layout_constraintStart_toStartOf="@id/view_head_seeting_bg"
-            app:layout_constraintEnd_toEndOf="@id/view_head_seeting_bg" />
+            app:layout_constraintTop_toTopOf="@+id/view_head_seeting_bg"
+            app:layout_constraintStart_toStartOf="@+id/view_head_seeting_bg"
+            app:layout_constraintEnd_toEndOf="@+id/view_head_seeting_bg" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -93,9 +93,9 @@
             style="@style/TextDefBlack"
             android:text="@string/head_setting_preview"
             android:layout_marginStart="@dimen/margin_large"
-            app:layout_constraintStart_toStartOf="@id/view_head_seeting_bg"
-            app:layout_constraintTop_toBottomOf="@id/view_head_seeting_div"
-            app:layout_constraintBottom_toBottomOf="@id/view_head_seeting_bg" />
+            app:layout_constraintStart_toStartOf="@+id/view_head_seeting_bg"
+            app:layout_constraintTop_toBottomOf="@+id/view_head_seeting_div"
+            app:layout_constraintBottom_toBottomOf="@+id/view_head_seeting_bg" />
 
         <TextView
             android:id="@+id/tv_head_setting_preview"
@@ -106,9 +106,9 @@
             tools:text="申勇"
             android:gravity="center"
             android:layout_marginEnd="@dimen/margin_20dp"
-            app:layout_constraintEnd_toEndOf="@id/view_head_seeting_bg"
-            app:layout_constraintTop_toBottomOf="@id/view_head_seeting_div"
-            app:layout_constraintBottom_toBottomOf="@id/view_head_seeting_bg" />
+            app:layout_constraintEnd_toEndOf="@+id/view_head_seeting_bg"
+            app:layout_constraintTop_toBottomOf="@+id/view_head_seeting_div"
+            app:layout_constraintBottom_toBottomOf="@+id/view_head_seeting_bg" />
 
         <Button
             android:id="@+id/btn_head_seeting_save"
@@ -121,7 +121,7 @@
             android:layout_marginTop="32dp"
             android:onClick="@{(v)->presenter.onClick(v)}"
             android:background="@drawable/selector_main_press_light_corner"
-            app:layout_constraintTop_toBottomOf="@id/view_head_seeting_bg" />
+            app:layout_constraintTop_toBottomOf="@+id/view_head_seeting_bg" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>
