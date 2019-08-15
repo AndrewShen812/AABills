@@ -27,6 +27,11 @@
 -keep class cn.smssdk.**{*;}
 -dontwarn com.mob.**
 
+#fastjson
+-dontwarn com.alibaba.fastjson.**
+-keep class com.alibaba.**{*;}
+-keep class com.alibaba.fastjson.**{*;}
+
 #Bugly
 -dontwarn com.tencent.bugly.**
 -keep public class com.tencent.bugly.**{*;}

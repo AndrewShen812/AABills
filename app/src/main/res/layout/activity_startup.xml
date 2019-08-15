@@ -1,46 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.StartupActivity">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/ll_start_up_name"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/cl_start_up"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="140dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        tools:context=".ui.StartupActivity">
 
-        <ImageView
-            android:id="@+id/iv_start_up_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:tint="@color/main_blue"
-            android:src="@drawable/ic_launcher" />
-
-        <TextView
+        <LinearLayout
+            android:id="@+id/ll_start_up_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_mid"
-            android:text="@string/app_name"
-            android:textColor="@color/text_color_black"
-            android:textSize="24dp" />
-    </LinearLayout>
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/slogan"
-        style="@style/TextBigBlack"
-        android:layout_marginTop="@dimen/margin_large"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ll_start_up_name"/>
+            <ImageView
+                android:id="@+id/iv_start_up_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_launcher"
+                android:tint="@color/main_blue" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_mid"
+                android:text="@string/app_name"
+                android:textColor="@color/text_color_black"
+                android:textSize="24dp" />
+        </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+        <TextView
+            style="@style/TextBigBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_large"
+            android:text="@string/slogan"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_start_up_name" />
+    </android.support.constraint.ConstraintLayout>
+</LinearLayout>
+

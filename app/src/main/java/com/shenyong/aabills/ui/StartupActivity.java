@@ -2,9 +2,15 @@ package com.shenyong.aabills.ui;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.view.PixelCopy;
+import android.view.View;
+import android.widget.Toast;
 
 import com.sddy.baseui.BaseActivity;
 import com.shenyong.aabills.R;
@@ -37,6 +43,27 @@ public class StartupActivity extends BaseActivity {
     }
 
     private void showMain() {
+//        View root = findViewById(R.id.cl_start_up);
+//        Bitmap image = Bitmap.createBitmap(root.getWidth(), root.getHeight(), Bitmap.Config.RGB_565);
+//        int[] pos = new int[2];
+//        root.getLocationInWindow(pos);
+//        Rect srcRect = new Rect(pos[0], pos[1], pos[0] + root.getWidth(), pos[1] + root.getHeight());
+//        PixelCopy.request(getWindow(), srcRect, image, {result ->
+//        if (result != PixelCopy.SUCCESS) {
+//            //                            Toast.makeText(this@MainActivity, "保存截图失败", Toast.LENGTH_SHORT).show()
+//            saveUnderAndroidO(root)
+//            return@request
+//        }
+//        val dir = cacheDir()
+//        val fullName = "${dir.path}${File.separator}share_img.jpg"
+//
+//        val fos = FileOutputStream(fullName)
+//        image.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+//        fos.flush()
+//        fos.close()
+//        Toast.makeText(this@MainActivity, "已保存截图", Toast.LENGTH_SHORT).show()
+//                    }, Handler(Looper.getMainLooper()))
+
         findViewById(R.id.ll_start_up_name).postDelayed(new Runnable() {
             @Override
             public void run() {
