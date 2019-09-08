@@ -23,7 +23,7 @@ public class AABilsApp extends BaseApplication {
 
     @Override
     public void exitApp() {
-        SyncBillsService.Companion.stopService();
+        SyncBillsService.stopService();
         super.exitApp();
     }
 
@@ -41,7 +41,7 @@ public class AABilsApp extends BaseApplication {
          * true表示初始化时自动检查升级;
          * false表示不会自动检查升级,需要手动调用Beta.checkUpgrade()方法;
          */
-        Beta.autoCheckUpgrade = false;
+        Beta.autoCheckUpgrade = true;
 
         /**
          * 设置升级检查周期为60s(默认检查周期为0s)，60s内SDK不重复向后台请求策略);

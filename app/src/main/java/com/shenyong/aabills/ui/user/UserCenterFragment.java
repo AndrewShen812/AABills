@@ -24,6 +24,7 @@ import com.shenyong.aabills.room.BillRecord;
 import com.shenyong.aabills.room.User;
 import com.shenyong.aabills.room.UserDao;
 import com.shenyong.aabills.room.UserSyncRecord;
+import com.shenyong.aabills.utils.AppUtils;
 import com.shenyong.aabills.utils.RxBus;
 import com.shenyong.aabills.utils.RxUtils;
 import com.shenyong.aabills.utils.WifiUtils;
@@ -92,6 +93,7 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
             mBinding.btnUserCenterSignOut.setText("登录");
             mBinding.btnUserCenterSignOut.setBackgroundResource(R.drawable.selector_main_press_light_corner);
         }
+        mBinding.tvUserCenterVersion.setText(getString(R.string.fmt_version, AppUtils.getVersionName(), AppUtils.getVersionCode()));
         mViewModel.loadUserProfile();
     }
 

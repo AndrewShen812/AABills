@@ -43,4 +43,6 @@
     <string name="head_setting_sel_color">设置头像</string>
     <string name="head_setting_preview">设置头像</string>
     <string name="head_setting_save">确认修改</string>
+    <string name="fmt_version">v %1$s.%2$d</string>
+
 </resources>

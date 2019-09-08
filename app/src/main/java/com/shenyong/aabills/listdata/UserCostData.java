@@ -1,8 +1,6 @@
 package com.shenyong.aabills.listdata;
 
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.shapes.Shape;
 
 import com.sddy.baseui.recycler.BaseHolderData;
 import com.sddy.baseui.recycler.databinding.BaseBindingHolder;
@@ -19,6 +17,8 @@ public class UserCostData extends BaseHolderData<BaseBindingHolder<LayoutUserCos
     public String mCostStr;
     /** 应支付或收取金额 */
     public String mPayOrGet;
+    public String mUid;
+    public boolean isExcluded = false;
 
     @Override
     public int getLayoutRes() {
@@ -33,6 +33,9 @@ public class UserCostData extends BaseHolderData<BaseBindingHolder<LayoutUserCos
         mNameBg.setShape(GradientDrawable.OVAL);
         mNameBg.setSize(size, size);
         mCostStr = holder.itemView.getResources().getString(R.string.statistic_user_cost, mCost);
+        if (isExcluded) {
+            mPayOrGet = "不参与统计";
+        }
         holder.mBinding.setData(this);
     }
 }

@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -50,7 +51,7 @@ public class StatisticsDetailViewModel extends ViewModel {
         mBillRepository = BillRepository.getInstance();
     }
 
-    public void observeStatisticData(LifecycleOwner owner, final long startTime, long endTime) {
+    public void observeStatisticData(LifecycleOwner owner, final long startTime, long endTime, final Set<String> excludeUsers) {
         mBillRepository.observeBills(startTime, endTime).observe(owner, new Observer<List<BillRecord>>() {
             @Override
             public void onChanged(@Nullable final List<BillRecord> billRecords) {
@@ -67,7 +68,7 @@ public class StatisticsDetailViewModel extends ViewModel {
                 .map(new Function<List<BillRecord>, String>() {
                     @Override
                     public String apply(List<BillRecord> billRecords) throws Exception {
-                        mStatData.postValue(calcStatData(billRecords));
+                        mStatData.postValue(calcStatData(billRecords, excludeUsers));
                         return "ok";
                     }
                 })
@@ -77,7 +78,7 @@ public class StatisticsDetailViewModel extends ViewModel {
         });
     }
 
-    private StatData calcStatData(List<BillRecord> bills) {
+    private StatData calcStatData(List<BillRecord> bills,  Set<String> excludeUsers) {
         Map<String, StatisticTypeData> typesMap = new HashMap<>();
         Map<String, UserCostData> costMap = new HashMap<>();
         double total = 0;
@@ -86,6 +87,7 @@ public class StatisticsDetailViewModel extends ViewModel {
         for (User u : allUsers) {
             UserCostData cost = new UserCostData();
             cost.mName = TextUtils.isEmpty(u.mName) ? "佚名" : u.mName;
+            cost.mUid = u.mUid;
             costMap.put(u.mUid, cost);
         }
         for (BillRecord bill : bills) {
@@ -95,8 +97,10 @@ public class StatisticsDetailViewModel extends ViewModel {
                 typesMap.put(bill.mType, type);
                 type.mType = bill.mType;
             }
-            total += bill.mAmount;
-            type.mAmount += bill.mAmount;
+            if (!excludeUsers.contains(bill.mUid)) {
+                total += bill.mAmount;
+                type.mAmount += bill.mAmount;
+            }
             // 按用户计算
             UserCostData cost = costMap.get(bill.mUid + "");
             if (cost == null) {
@@ -107,8 +111,18 @@ public class StatisticsDetailViewModel extends ViewModel {
             }
             cost.mCost += bill.mAmount;
         }
+        ArrayList<UserCostData> includeCost = new ArrayList<>();
+        ArrayList<UserCostData> excludeCost = new ArrayList<>();
+        for (UserCostData u : costMap.values()) {
+            if (excludeUsers.contains(u.mUid)) {
+                u.isExcluded = true;
+                excludeCost.add(u);
+                continue;
+            }
+            includeCost.add(u);
+        }
         StatData stat = new StatData();
-        stat.mCostData = new ArrayList<>(costMap.values());
+        stat.mCostData = new ArrayList<>(includeCost);
         stat.mTypesData = new ArrayList<>(typesMap.values());
         // 总金额/均摊人数
         stat.mAvgCost = total / stat.mCostData.size();
@@ -118,11 +132,14 @@ public class StatisticsDetailViewModel extends ViewModel {
                 return (int) (o2.mCost - o1.mCost);
             }
         });
+
         for (UserCostData cost : stat.mCostData) {
             double payOrGet = cost.mCost - stat.mAvgCost;
             String flag = payOrGet > 0 ? "+" : "";
             cost.mPayOrGet = String.format("%s%.1f", flag, payOrGet);
         }
+        // 追加不参与统计的用户在最后显示
+        stat.mCostData.addAll(excludeCost);
 
         for (StatisticTypeData type : stat.mTypesData) {
             type.mPercent = type.mAmount / total;

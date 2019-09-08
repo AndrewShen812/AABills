@@ -11,13 +11,23 @@ import android.view.View;
 
 import com.sddy.baseui.BaseActivity;
 import com.sddy.baseui.BaseBindingActivity;
+import com.sddy.baseui.dialog.DialogFactory;
+import com.sddy.baseui.dialog.MsgDialog;
+import com.sddy.baseui.dialog.MsgToast;
+import com.sddy.baseui.recycler.BaseHolderData;
 import com.sddy.baseui.recycler.DefaultItemDivider;
+import com.sddy.baseui.recycler.IItemClickLisntener;
 import com.sddy.baseui.recycler.databinding.SimpleBindingAdapter;
 import com.sddy.utils.ViewUtils;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.databinding.ActivityStatisticDetailBinding;
 import com.shenyong.aabills.listdata.StatisticTypeData;
+import com.shenyong.aabills.listdata.UserCostData;
+import com.shenyong.aabills.room.BillsDataSource;
 import com.shenyong.aabills.ui.viewmodel.StatisticsDetailViewModel;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 统计详情页面，图表和人均
@@ -42,6 +52,7 @@ public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatist
     private long mStartTime;
     private long mEndTime;
     private int mYear;
+    private Set<String> mExcludeUsers = new HashSet<>();
 
     public static void showThisPage(BaseActivity activity, String title, long startTime, long endTime) {
         Bundle data = new Bundle();
@@ -128,7 +139,18 @@ public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatist
                     total += data.mAmount;
                 }
                 for (int i = 0; i < stat.mCostData.size(); i++) {
-                    stat.mCostData.get(i).mColorRes = mColors[i % mColors.length];
+                    UserCostData cost = stat.mCostData.get(i);
+                    cost.mColorRes = mColors[i % mColors.length];
+                    if (cost.isExcluded) {
+                        cost.mLongClickListener = null;
+                        continue;
+                    }
+                    cost.mLongClickListener = new IItemClickLisntener<UserCostData>() {
+                        @Override
+                        public void onClick(UserCostData data, int position) {
+                            showConfirm(data);
+                        }
+                    };
                 }
                 mBindings.csvStatistic.setData(percents);
                 mBindings.csvStatistic.setCenterText(String.format("%.1f", total));
@@ -143,8 +165,20 @@ public class StatisticDetailActivity extends BaseBindingActivity<ActivityStatist
         });
     }
 
+    private void showConfirm(final UserCostData data) {
+        MsgDialog dialog = DialogFactory.confirmDialogWithoutTitle("不算ta(" + data.mName + ")在内？", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mExcludeUsers.add(data.mUid);
+                loadData();
+            }
+        });
+
+        dialog.show(getSupportFragmentManager());
+    }
+
     private void loadData() {
-        mStatModel.observeStatisticData(this, mStartTime, mEndTime);
+        mStatModel.observeStatisticData(this, mStartTime, mEndTime, mExcludeUsers);
 //        mStatModel.loadStatisticData(mStartTime, mEndTime, new StatisticsDetailViewModel.LoadStatsticsCallback() {
 //            @Override
 //            public void onComplete(StatisticsDetailViewModel.StatData stat) {

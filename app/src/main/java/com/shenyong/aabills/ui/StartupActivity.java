@@ -10,12 +10,14 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.PixelCopy;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sddy.baseui.BaseActivity;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.ui.user.UserLoginActivity;
+import com.shenyong.aabills.utils.AppUtils;
 
 public class StartupActivity extends BaseActivity {
 
@@ -25,6 +27,8 @@ public class StartupActivity extends BaseActivity {
         setContentView(R.layout.activity_startup);
         showFullScreen();
         UserManager.INSTANCE.autoLogin();
+        TextView tvVersion = findViewById(R.id.tv_start_up_version);
+        tvVersion.setText(getString(R.string.fmt_version, AppUtils.getVersionName(), AppUtils.getVersionCode()));
     }
 
     @Override

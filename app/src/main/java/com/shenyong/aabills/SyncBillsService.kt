@@ -59,6 +59,7 @@ class SyncBillsService : Service() {
             context.startService(Intent(context, SyncBillsService::class.java))
         }
 
+        @JvmStatic
         fun stopService() {
             val context = AABilsApp.getInstance().applicationContext
             context.stopService(Intent(context, SyncBillsService::class.java))
