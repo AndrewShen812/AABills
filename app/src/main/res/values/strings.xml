@@ -37,6 +37,7 @@
     <string name="title_user_center">个人中心</string>
     <string name="user_center_head_color">头像颜色</string>
     <string name="user_center_set_nickname">设置昵称</string>
+    <string name="user_center_current_friends">AA好友</string>
     <string name="set_nickname_title">编辑昵称</string>
     <string name="user_center_sign_out">退出登录</string>
     <string name="title_head_setting">设置头像</string>

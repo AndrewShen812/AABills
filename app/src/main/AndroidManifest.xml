@@ -19,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:icon">
+        tools:replace="android:icon"
+        tools:ignore="GoogleAppIndexingWarning">
 
         <!-- Bugly升级 -->
         <activity
@@ -50,7 +51,7 @@
         <activity android:name=".ui.StatisticDetailActivity" />
         <activity android:name=".ui.BillsListActivity" />
         <activity android:name=".ui.user.UserLoginActivity" />
-        <activity android:name=".ui.user.UserRegActivity"></activity>
+        <activity android:name=".ui.user.UserRegActivity" />
 
         <service android:name=".SyncBillsService"
             android:exported="false"/>

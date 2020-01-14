@@ -2,8 +2,6 @@ package com.shenyong.aabills;
 
 import android.os.Environment;
 
-import com.facebook.stetho.Stetho;
-import com.mob.MobSDK;
 import com.sddy.baseui.BaseApplication;
 import com.shenyong.aabills.ui.MainActivity;
 import com.tencent.bugly.Bugly;
@@ -17,8 +15,6 @@ public class AABilsApp extends BaseApplication {
 
         buglyBetaSetting();
         Bugly.init(getApplicationContext(), "22bb300810", true);
-        MobSDK.init(this);
-        Stetho.initializeWithDefaults(this);
     }
 
     @Override

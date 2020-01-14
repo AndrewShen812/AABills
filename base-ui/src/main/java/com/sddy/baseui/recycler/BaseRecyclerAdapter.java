@@ -38,6 +38,15 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<BaseHolde
             mListData.addAll(listData);
             notifyDataSetChanged();
         }
+        updateData(listData, false);
+    }
+
+    public void updateData(List<? extends BaseHolderData> listData, boolean allowEmpty) {
+        if (!ArrayUtils.isEmpty(listData) || allowEmpty) {
+            mListData.clear();
+            mListData.addAll(listData);
+            notifyDataSetChanged();
+        }
     }
 
     @Override

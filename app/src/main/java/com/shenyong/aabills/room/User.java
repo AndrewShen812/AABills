@@ -1,14 +1,25 @@
 package com.shenyong.aabills.room;
 
+import android.annotation.SuppressLint;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.google.gson.annotations.SerializedName;
+import com.sddy.baseui.dialog.MsgToast;
+import com.shenyong.aabills.utils.RxUtils;
+
+import java.util.UUID;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.functions.Consumer;
 
 @Entity(tableName = "user")
 public class User {
@@ -50,8 +61,9 @@ public class User {
         this.mName = mName;
         mPhone = "";
         mPwd = "";
-        mHeadBg = 0x2A82E4;
+        mHeadBg = 0xFF2A82E4;
         isLastLogin = false;
+        mUid = UUID.randomUUID().toString();
     }
 
     @Override
@@ -68,11 +80,38 @@ public class User {
                 '}';
     }
 
-    public String getNickName() {
+    public String getName() {
         if (!TextUtils.isEmpty(mName)) {
             return mName;
         }
-        // 取电话前3位吧
-        return mPhone.substring(0, 3);
+        return Build.MODEL;
+    }
+
+    /**
+     * 获取一个短名称，方便再圆圈背景内显示
+     * @return
+     */
+    public String getShortName() {
+        String name = getName();
+        // 取前3位吧
+        return name.length() > 3 ? name.substring(0, 3) : name;
+    }
+
+    @SuppressLint("CheckResult")
+    public void saveLocal() {
+        Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
+                BillDatabase.getInstance().userDao().updateUser(User.this);
+                emitter.onNext("");
+                emitter.onComplete();
+            }
+        })
+        .compose(RxUtils.<String>ioMainScheduler())
+        .subscribe(new Consumer<String>() {
+            @Override
+            public void accept(String s) {
+            }
+        });
     }
 }

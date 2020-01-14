@@ -9,13 +9,14 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
-import io.reactivex.Observable;
-
 @Dao
 public interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertUser(User user);
+
+    @Update
+    void updateUser(User user);
 
     @Query("update user set isLastLogin = :isLastLogin where mUid = :uid")
     void updateLastLogin(String uid, boolean isLastLogin);

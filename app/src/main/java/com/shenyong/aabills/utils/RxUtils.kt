@@ -11,6 +11,7 @@ import io.reactivex.schedulers.Schedulers
  */
 object RxUtils {
 
+    @JvmStatic
     fun <T> ioMainScheduler(): ObservableTransformer<T, T> {
         return ObservableTransformer {
             it.subscribeOn(Schedulers.io())

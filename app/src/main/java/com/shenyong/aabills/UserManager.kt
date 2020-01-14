@@ -1,5 +1,6 @@
 package com.shenyong.aabills
 
+import android.os.Build
 import android.util.Base64
 import com.alibaba.fastjson.JSON
 import com.sddy.baseui.dialog.MsgToast
@@ -16,7 +17,6 @@ import com.shenyong.aabills.room.User
 import com.shenyong.aabills.utils.RxUtils
 import io.reactivex.Observable
 import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
@@ -28,19 +28,46 @@ import io.reactivex.schedulers.Schedulers
  */
 object UserManager {
 
-    var user = User("")
+    @JvmField
+    var user = User(Build.MODEL)
 
     fun autoLogin() {
         Observable.create<User> { emitter ->
             val userDao = BillDatabase.getInstance().userDao()
             val localUser = userDao.findLastLoginUser()
             if (localUser != null) {
-                login(localUser.mPhone, localUser.mPwd, null)
+//                login(localUser.mPhone, localUser.mPwd, null)
+                user = localUser
+                // 2020年1月14日 fix: 修复已存在记录因账单所属用户Uid为空显示“佚名”问题
+                markNoUidBillAsMine()
+            } else {
+                // 新安装使用的用户，添加到数据库
+                userDao.insertUser(user)
+                user.isLastLogin = true
+                userDao.updateLastLogin(user.mUid, true)
             }
+            user.isLogin = true
+            emitter.onNext(user)
             emitter.onComplete()
         }
             .compose(RxUtils.ioMainScheduler())
-            .subscribe()
+            .subscribe(object : Observer<User> {
+                override fun onComplete() {
+                    SyncBillsService.startService()
+                }
+
+                override fun onSubscribe(d: Disposable) {
+
+                }
+
+                override fun onNext(t: User) {
+
+                }
+
+                override fun onError(e: Throwable) {
+
+                }
+            })
 
     }
 
@@ -50,13 +77,11 @@ object UserManager {
             .subscribe(object : AAObserver<MobResponse<LoginResult>>() {
                 override fun onNext(response: MobResponse<LoginResult>) {
                     if (response.isSuccess() && response.result != null) {
-                        val loginUser = User("")
-                        loginUser.isLogin = true
-                        loginUser.mPhone = phone
-                        loginUser.mPwd = pwd
-                        loginUser.mUid = response.result!!.uid
-                        loginUser.mToken = response.result!!.token
-                        user = loginUser
+                        user.isLogin = true
+                        user.mPhone = phone
+                        user.mPwd = pwd
+                        user.mUid = response.result!!.uid
+                        user.mToken = response.result!!.token
                         updateLastLoginUser()
                         // TODO 2018/11/27: 是否应该先提示
                         markNoUidBillAsMine()
@@ -80,15 +105,6 @@ object UserManager {
                 it.isLastLogin = it.mUid == user.mUid
                 userDao.updateLastLogin(it.mUid, it.isLastLogin)
             }
-        }
-            .compose(RxUtils.ioMainScheduler())
-            .subscribe()
-    }
-
-    fun saveLocal() {
-        Observable.create<String> {
-            val userDao = BillDatabase.getInstance().userDao()
-            userDao.insertUser(user)
         }
             .compose(RxUtils.ioMainScheduler())
             .subscribe()

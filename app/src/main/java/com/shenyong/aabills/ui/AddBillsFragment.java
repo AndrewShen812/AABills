@@ -3,7 +3,6 @@ package com.shenyong.aabills.ui;
 import android.app.DatePickerDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,13 +12,10 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 
 import com.sddy.baseui.BaseBindingFragment;
 import com.sddy.baseui.dialog.MsgDialog;
 import com.sddy.baseui.dialog.MsgToast;
-import com.sddy.baseui.recycler.BaseHolder;
 import com.sddy.baseui.recycler.BaseHolderData;
 import com.sddy.baseui.recycler.DefaultItemDivider;
 import com.sddy.baseui.recycler.IItemClickLisntener;
@@ -27,7 +23,6 @@ import com.sddy.baseui.recycler.databinding.SimpleBindingAdapter;
 import com.sddy.utils.DimenUtils;
 import com.sddy.utils.TimeUtils;
 import com.sddy.utils.ViewUtils;
-import com.sddy.utils.log.Log;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.databinding.FragmentAddBillBinding;
@@ -40,13 +35,10 @@ import com.shenyong.aabills.ui.viewmodel.AddBillsViewModel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Emitter;
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -223,7 +215,7 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
             return;
         }
         mBill.mAddTime = System.currentTimeMillis();
-        User user = UserManager.INSTANCE.getUser();
+        User user = UserManager.user;
         if (user.isLogin && !TextUtils.isEmpty(user.mUid)) {
             mBill.mUid = user.mUid;
         }

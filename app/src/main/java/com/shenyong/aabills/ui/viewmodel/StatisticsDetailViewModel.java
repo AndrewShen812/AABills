@@ -86,7 +86,7 @@ public class StatisticsDetailViewModel extends ViewModel {
         List<User> allUsers = userDao.queryAllUsers();
         for (User u : allUsers) {
             UserCostData cost = new UserCostData();
-            cost.mName = TextUtils.isEmpty(u.mName) ? "佚名" : u.mName;
+            cost.mName = TextUtils.isEmpty(u.mName) ? "佚名" : u.getShortName();
             cost.mUid = u.mUid;
             costMap.put(u.mUid, cost);
         }
@@ -107,7 +107,7 @@ public class StatisticsDetailViewModel extends ViewModel {
                 cost = new UserCostData();
                 costMap.put(bill.mUid, cost);
                 User user = userDao.findLocalUser(bill.mUid);
-                cost.mName = user == null ? "佚名" : user.mName;
+                cost.mName = user == null ? "佚名" : user.getShortName();
             }
             cost.mCost += bill.mAmount;
         }

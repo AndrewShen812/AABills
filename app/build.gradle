@@ -6,17 +6,6 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
-apply plugin: 'com.mob.sdk'
-
-MobSDK {
-    appKey "2864ae0033733"
-    appSecret "d134839883b5b1085615f36c3e014b65"
-
-    SMSSDK {
-        gui false
-    }
-}
-
 android {
     signingConfigs {
         debug {
@@ -52,6 +41,7 @@ android {
             }
         }
         debug {
+//            applicationIdSuffix ".debug"
             signingConfig signingConfigs.debug
             ndk {
                 //设置支持的SO库架构
@@ -88,8 +78,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
     implementation 'com.alibaba:fastjson:1.2.51'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
-    implementation 'com.facebook.stetho:stetho:1.5.0'
-    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
+    debugImplementation 'com.facebook.stetho:stetho:1.5.0'
+    debugImplementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
     // fastjson支持kotlin需要
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
