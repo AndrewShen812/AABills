@@ -10,7 +10,6 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 
-import com.alibaba.fastjson.JSON;
 import com.sddy.baseui.BaseBindingFragment;
 import com.sddy.baseui.dialog.MsgDialog;
 import com.sddy.baseui.dialog.MsgToast;
@@ -22,26 +21,19 @@ import com.sddy.utils.ViewUtils;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.SyncBillsService;
 import com.shenyong.aabills.UserManager;
-import com.shenyong.aabills.api.AAObserver;
 import com.shenyong.aabills.databinding.FragmentUserCenterBinding;
 import com.shenyong.aabills.listdata.AaFriend;
-import com.shenyong.aabills.room.BillDao;
 import com.shenyong.aabills.room.BillDatabase;
-import com.shenyong.aabills.room.BillRecord;
 import com.shenyong.aabills.room.User;
-import com.shenyong.aabills.room.UserDao;
-import com.shenyong.aabills.room.UserSyncRecord;
+import com.shenyong.aabills.rx.RxExecutor;
 import com.shenyong.aabills.utils.AppUtils;
 import com.shenyong.aabills.utils.RxBus;
-import com.shenyong.aabills.utils.RxUtils;
 import com.shenyong.aabills.utils.WifiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
@@ -97,9 +89,9 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
         super.onResume();
         mBinding.tvUserCenterVersion.setText(getString(R.string.fmt_version, AppUtils.getVersionName(), AppUtils.getVersionCode()));
         mViewModel.loadUserProfile();
-        Observable.create(new ObservableOnSubscribe<List<AaFriend>>() {
+        RxExecutor.backgroundWork(new Callable<List<AaFriend>>() {
             @Override
-            public void subscribe(ObservableEmitter<List<AaFriend>> emitter) throws Exception {
+            public List<AaFriend> call() throws Exception {
                 List<User> users = BillDatabase.getInstance().userDao().queryOtherUsers(UserManager.user.mUid);
                 List<AaFriend> items = new ArrayList<>();
                 if (!ArrayUtils.isEmpty(users)) {
@@ -117,11 +109,9 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
                         items.add(friend);
                     }
                 }
-                emitter.onNext(items);
-                emitter.onComplete();
+                return items;
             }
-        }).compose(RxUtils.<List<AaFriend>>ioMainScheduler())
-        .subscribe(new Consumer<List<AaFriend>>() {
+        }).subscribe(new Consumer<List<AaFriend>>() {
             @Override
             public void accept(List<AaFriend> aaFriends) throws Exception {
                 adapter.updateData(aaFriends, true);

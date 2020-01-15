@@ -97,21 +97,4 @@ public class User {
         return name.length() > 3 ? name.substring(0, 3) : name;
     }
 
-    @SuppressLint("CheckResult")
-    public void saveLocal() {
-        Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
-                BillDatabase.getInstance().userDao().updateUser(User.this);
-                emitter.onNext("");
-                emitter.onComplete();
-            }
-        })
-        .compose(RxUtils.<String>ioMainScheduler())
-        .subscribe(new Consumer<String>() {
-            @Override
-            public void accept(String s) {
-            }
-        });
-    }
 }

@@ -1,6 +1,5 @@
 package com.shenyong.aabills.api
 
-import com.facebook.stetho.okhttp3.StethoInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -22,7 +21,6 @@ class API {
 
             val httpClient = OkHttpClient.Builder()
                     .addNetworkInterceptor(logging)
-                    .addNetworkInterceptor(StethoInterceptor())
                     .build()
             Retrofit.Builder()
                     .client(httpClient)

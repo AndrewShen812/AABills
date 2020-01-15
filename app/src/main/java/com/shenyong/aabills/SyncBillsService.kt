@@ -7,7 +7,6 @@ import android.net.wifi.WifiManager
 import android.os.IBinder
 import com.alibaba.fastjson.JSON
 import com.sddy.utils.log.Log
-import com.shenyong.aabills.UserManager.user
 import com.shenyong.aabills.api.AAObserver
 import com.shenyong.aabills.room.BillDatabase
 import com.shenyong.aabills.room.BillRecord
@@ -15,6 +14,7 @@ import com.shenyong.aabills.room.UserSyncRecord
 import com.shenyong.aabills.sync.AAPacket
 import com.shenyong.aabills.utils.RxBus
 import com.shenyong.aabills.utils.RxTimer
+import com.shenyong.aabills.utils.TaskExecutor
 import com.shenyong.aabills.utils.WifiUtils
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
@@ -28,6 +28,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 
 /**
+ * 局域网账单同步服务
  * Author: sheny
  * Date: 2018/11/11
  */
@@ -79,9 +80,12 @@ class SyncBillsService : Service() {
         }
     }
 
+    /**
+     * 添加同步请求到发送队列，包含本机ip和uid，如果有需要同步给本机用户的账单，会收到TYPE_DATA数据包
+     */
     private fun syncBroadcast() {
         mSyncTimer.interval(3_000) {
-            // 发送同步请求，包含本机ip和uid，如果有需要同步给本机用户的账单，会收到TYPE_DATA数据包
+            val user = UserManager.user
             val sync = AAPacket.syncPacket(mMyIp, user.mUid)
             enqueueData(sync, false)
         }
@@ -140,10 +144,10 @@ class SyncBillsService : Service() {
         mRecvTask = Observable.create(ObservableOnSubscribe<String> {
             val buffer = ByteArray(1024)
             loop@ while (true) {
-                val packet = DatagramPacket(buffer, buffer.size)
+                val udpPacket = DatagramPacket(buffer, buffer.size)
                 try {
-                    mRecvSocket?.receive(packet)
-                    val rcvData = String(packet.data, packet.offset, packet.length)
+                    mRecvSocket?.receive(udpPacket)
+                    val rcvData = String(udpPacket.data, udpPacket.offset, udpPacket.length)
                     if (!rcvData.startsWith(PACK_PREFIX)) {
                         Log.Http.d("不识别的请求：$rcvData")
                         continue
@@ -203,17 +207,17 @@ class SyncBillsService : Service() {
      * 处理接收到的同步请求，检查是否有需要发送给对方的账单
      */
     private fun handleSyncRequest(packet: AAPacket) {
-        if (packet.orgUid.isNullOrEmpty()) {
+        if (packet.orgUid.isEmpty()) {
             return
         }
-        val user = UserManager.user
-        Observable.create<String> {
+        TaskExecutor.diskIO().execute {
+            val user = UserManager.user
             val userDao = BillDatabase.getInstance().userDao()
             val billDao = BillDatabase.getInstance().billDao()
-            val syncRecord = userDao.getSyncRecord(user.mUid, packet.orgUid)
-            var bills = if (syncRecord == null) {
+            var syncRecord = userDao.getSyncRecord(user.mUid, packet.orgUid)
+            val bills = if (syncRecord == null) {
                 // 同步全部
-                billDao.getNeedSyncBills()
+                billDao.needSyncBills
             } else {
                 // 部分同步
                 billDao.getNeedSyncBills(syncRecord.mLastSentBillAddTime)
@@ -222,7 +226,7 @@ class SyncBillsService : Service() {
                 sendBills(bills, packet.orgIp, packet.orgUid)
                 // 更新本机的同步记录
                 val bill = bills.first()
-                val syncRecord = UserSyncRecord()
+                syncRecord = UserSyncRecord()
                 syncRecord.mMyUid = user.mUid
                 syncRecord.mLANUid = packet.orgUid
                 syncRecord.mLastSentBillId = bill.mId
@@ -230,8 +234,6 @@ class SyncBillsService : Service() {
                 userDao.updateSyncRecord(syncRecord)
             }
         }
-            .subscribeOn(Schedulers.io())
-            .subscribe()
     }
 
     /** 在工作线程处理，可能会阻塞 */
@@ -249,7 +251,7 @@ class SyncBillsService : Service() {
     }
 
     private fun handleBillData(packet: AAPacket) {
-        Observable.create<String> {
+        TaskExecutor.diskIO().execute {
             val billDao = BillDatabase.getInstance().billDao()
             val bill = JSON.parseObject(packet.data, BillRecord::class.java)
             billDao.insertBill(bill)
@@ -260,11 +262,5 @@ class SyncBillsService : Service() {
                 UserManager.addLanUser(bill.mUid)
             }
         }
-            .subscribeOn(Schedulers.io())
-            .subscribe(object : AAObserver<String>() {
-                override fun onNext(t: String) {
-
-                }
-            })
     }
 }

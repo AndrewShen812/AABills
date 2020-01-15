@@ -11,6 +11,7 @@ import com.shenyong.aabills.AABilsApp
 import com.shenyong.aabills.R
 import com.shenyong.aabills.UserManager
 import com.shenyong.aabills.room.BillDatabase
+import com.shenyong.aabills.rx.RxExecutor
 import com.shenyong.aabills.utils.RxUtils
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
@@ -64,13 +65,9 @@ class UserCenterViewModel : ViewModel() {
         shortName.value = user.shortName
         user.mHeadBg = headColor
 
-        Observable.create(ObservableOnSubscribe<String> { emitter ->
+        RxExecutor.backgroundWork {
             BillDatabase.getInstance().userDao().updateUser(user)
-            emitter.onNext("")
-            emitter.onComplete()
-        })
-        .compose(RxUtils.ioMainScheduler())
-        .subscribe {
+        }.subscribe {
             MsgToast.shortToast("修改成功")
         }
     }

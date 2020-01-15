@@ -13,12 +13,11 @@ import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.databinding.ActivityHeadSettingBinding;
 import com.shenyong.aabills.room.BillDatabase;
 import com.shenyong.aabills.room.User;
+import com.shenyong.aabills.rx.RxExecutor;
 import com.shenyong.aabills.utils.DrawableUtils;
-import com.shenyong.aabills.utils.RxUtils;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
+import java.util.concurrent.Callable;
+
 import io.reactivex.functions.Consumer;
 
 public class HeadSettingActivity extends BaseBindingActivity<ActivityHeadSettingBinding> {
@@ -86,18 +85,15 @@ public class HeadSettingActivity extends BaseBindingActivity<ActivityHeadSetting
     private void saveSetting() {
         final User user = UserManager.user;
         user.mHeadBg = mSelColor;
-        Observable.create(new ObservableOnSubscribe<String>() {
+        RxExecutor.backgroundWork(new Callable<Integer>() {
             @Override
-            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
+            public Integer call() throws Exception {
                 BillDatabase.getInstance().userDao().updateUser(user);
-                emitter.onNext("");
-                emitter.onComplete();
+                return 0;
             }
-        })
-        .compose(RxUtils.<String>ioMainScheduler())
-        .subscribe(new Consumer<String>() {
+        }).subscribe(new Consumer<Integer>() {
             @Override
-            public void accept(String s) {
+            public void accept(Integer o) throws Exception {
                 MsgToast.shortToast("修改成功");
                 finish();
             }

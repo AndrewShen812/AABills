@@ -14,7 +14,9 @@ import com.shenyong.aabills.api.bean.MobResponse
 import com.shenyong.aabills.api.bean.UserProfile
 import com.shenyong.aabills.room.BillDatabase
 import com.shenyong.aabills.room.User
+import com.shenyong.aabills.rx.RxExecutor
 import com.shenyong.aabills.utils.RxUtils
+import com.shenyong.aabills.utils.TaskExecutor
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
@@ -29,46 +31,26 @@ import io.reactivex.schedulers.Schedulers
 object UserManager {
 
     @JvmField
-    var user = User(Build.MODEL)
+    var  user = User(Build.MODEL)
 
     fun autoLogin() {
-        Observable.create<User> { emitter ->
+        RxExecutor.backgroundWork {
             val userDao = BillDatabase.getInstance().userDao()
             val localUser = userDao.findLastLoginUser()
             if (localUser != null) {
-//                login(localUser.mPhone, localUser.mPwd, null)
                 user = localUser
-                // 2020年1月14日 fix: 修复已存在记录因账单所属用户Uid为空显示“佚名”问题
+                user.isLogin = true
+                // 2020年1月14日 fixbug: 修复已存在记录因账单所属用户Uid为空显示“佚名”问题
                 markNoUidBillAsMine()
             } else {
                 // 新安装使用的用户，添加到数据库
-                userDao.insertUser(user)
+                user.isLogin = true
                 user.isLastLogin = true
-                userDao.updateLastLogin(user.mUid, true)
+                userDao.insertUser(user)
             }
-            user.isLogin = true
-            emitter.onNext(user)
-            emitter.onComplete()
+        }.subscribe {
+            SyncBillsService.startService()
         }
-            .compose(RxUtils.ioMainScheduler())
-            .subscribe(object : Observer<User> {
-                override fun onComplete() {
-                    SyncBillsService.startService()
-                }
-
-                override fun onSubscribe(d: Disposable) {
-
-                }
-
-                override fun onNext(t: User) {
-
-                }
-
-                override fun onError(e: Throwable) {
-
-                }
-            })
-
     }
 
     fun login(phone: String, pwd: String, callback: AAObserver<MobResponse<LoginResult>>?) {
@@ -97,7 +79,7 @@ object UserManager {
     }
 
     private fun updateLastLoginUser() {
-        Observable.create<String> {
+        TaskExecutor.diskIO().execute {
             val userDao = BillDatabase.getInstance().userDao()
             val users = userDao.queryOtherUsers(user.mUid)
             users.add(user)
@@ -106,15 +88,13 @@ object UserManager {
                 userDao.updateLastLogin(it.mUid, it.isLastLogin)
             }
         }
-            .compose(RxUtils.ioMainScheduler())
-            .subscribe()
     }
 
     /**
      * 将本地登录用户前记录的账单mUid标记为当前登录用户
      */
     private fun markNoUidBillAsMine() {
-        Observable.create<String> {
+        TaskExecutor.diskIO().execute {
             val billDao = BillDatabase.getInstance().billDao()
             val noUidBills = billDao.noUidBills
             noUidBills.forEach {
@@ -122,8 +102,6 @@ object UserManager {
             }
             billDao.updateBills(noUidBills)
         }
-                .compose(RxUtils.ioMainScheduler())
-                .subscribe()
     }
 
     /**
