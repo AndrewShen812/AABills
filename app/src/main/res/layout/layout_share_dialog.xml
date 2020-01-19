@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/iv_share_qr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_large"
+        android:src="@mipmap/ic_launcher"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_share_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_mid"
+        android:text="扫描上方二维码下载体验"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_share_qr" />
+
+    <Button
+        android:id="@+id/btn_share_send"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginTop="@dimen/margin_mid"
+        android:layout_marginBottom="@dimen/margin_large"
+        android:background="@drawable/selector_share_send"
+        android:textSize="@dimen/text_size_default"
+        android:textColor="@color/text_color_black"
+        android:paddingHorizontal="@dimen/margin_large"
+        android:text="复制下载链接，发送给朋友"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_share_tips" />
+
+
+</android.support.constraint.ConstraintLayout>

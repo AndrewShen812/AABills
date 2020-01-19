@@ -5,13 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
 import android.os.IBinder
+import android.support.annotation.WorkerThread
 import com.alibaba.fastjson.JSON
 import com.sddy.utils.log.Log
-import com.shenyong.aabills.api.AAObserver
 import com.shenyong.aabills.room.BillDatabase
 import com.shenyong.aabills.room.BillRecord
+import com.shenyong.aabills.room.User
 import com.shenyong.aabills.room.UserSyncRecord
 import com.shenyong.aabills.sync.AAPacket
+import com.shenyong.aabills.sync.StopEvent
 import com.shenyong.aabills.utils.RxBus
 import com.shenyong.aabills.utils.RxTimer
 import com.shenyong.aabills.utils.TaskExecutor
@@ -46,6 +48,11 @@ class SyncBillsService : Service() {
     private var mMyIp: String = ""
     private var mMulticastLock: WifiManager.MulticastLock? = null
     private var remainTime = TIME_OUT
+    private var allowSyncBill = false
+    private var allowScanUser = false
+    private var isRunning = true
+    // 发送记录，避免重复发送
+    private val sendRecord = HashSet<String>()
 
     companion object {
         private const val PORT = 9999
@@ -55,9 +62,20 @@ class SyncBillsService : Service() {
 //        private const val GROUP_IP = "238.255.255.1"
         private const val TIME_OUT = 60
 
-        fun startService() {
+        private fun startSerice(cmdType: Int) {
             val context = AABilsApp.getInstance().applicationContext
-            context.startService(Intent(context, SyncBillsService::class.java))
+            val intent = Intent(context, SyncBillsService::class.java)
+            intent.putExtra("cmdType", cmdType)
+            context.startService(intent)
+        }
+
+        @JvmStatic
+        fun startSyncBill() {
+            startSerice(AAPacket.TYPE_SYNC)
+        }
+
+        fun startScanUser() {
+            startSerice(AAPacket.TYPE_SCAN)
         }
 
         @JvmStatic
@@ -81,13 +99,19 @@ class SyncBillsService : Service() {
     }
 
     /**
-     * 添加同步请求到发送队列，包含本机ip和uid，如果有需要同步给本机用户的账单，会收到TYPE_DATA数据包
+     * 添加请求到发送队列，包含本机ip和uid，接收方根据指令类型处理请求
      */
-    private fun syncBroadcast() {
+    private fun startBroadcast() {
         mSyncTimer.interval(3_000) {
             val user = UserManager.user
+
             val sync = AAPacket.syncPacket(mMyIp, user.mUid)
             enqueueData(sync, false)
+
+            if (allowScanUser) {
+                val scan = AAPacket.scanPacket(mMyIp, user.mUid)
+                enqueueData(scan, false)
+            }
         }
     }
 
@@ -126,24 +150,48 @@ class SyncBillsService : Service() {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        syncBroadcast()
+        startBroadcast()
 
+        startSendTask()
+        startRecvTask()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val cmdType = intent?.getIntExtra("cmdType", 0)
+        if (cmdType == AAPacket.TYPE_SYNC) {
+            allowSyncBill = true
+        }
+        if (cmdType == AAPacket.TYPE_SCAN) {
+            allowScanUser = true
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun startSendTask() {
         mSendTask = Observable.create<String> {
-            while (true) {
-                val data = mSendQueue.poll()
-                if (data != null) {
-                    mSendSocket?.let {
-                        it.send(DatagramPacket(data, data.size,
-                                mGroupAddress, PORT))
+            while (isRunning) {
+                try {
+                    val data = mSendQueue.poll()
+                    if (data != null) {
+                        mSendSocket?.let {
+                            it.send(DatagramPacket(data, data.size,
+                                    mGroupAddress, PORT))
+                        }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    break
                 }
             }
         }
-            .subscribeOn(Schedulers.io())
-            .subscribe()
+        .subscribeOn(Schedulers.io())
+        .subscribe()
+    }
+
+    private fun startRecvTask() {
         mRecvTask = Observable.create(ObservableOnSubscribe<String> {
             val buffer = ByteArray(1024)
-            loop@ while (true) {
+            while (true) {
                 val udpPacket = DatagramPacket(buffer, buffer.size)
                 try {
                     mRecvSocket?.receive(udpPacket)
@@ -153,36 +201,51 @@ class SyncBillsService : Service() {
                         continue
                     }
                     val packet = AAPacket.jsonToPacket(rcvData.split("_")[1])
-                    when (packet.type) {
-                        AAPacket.TYPE_SYNC -> {
-                            // 过滤掉自己发出的广播包
-                            if (isFromMyself(packet)) {
-                                continue@loop
-                            }
-                            // 1、收到aabillsSync的同步请求
-                            Log.Http.d("同步请求：$packet")
-                            handleSyncRequest(packet)
-                        }
-                        AAPacket.TYPE_DATA -> {
-                            if (isFromMyself(packet)) {
-                                continue@loop
-                            }
-                            // 收到账单数据
-                            Log.Http.d("局域网账单：$packet")
-                            handleBillData(packet)
-                        }
-                        else -> {
-                            Log.Http.d("不识别的请求：$rcvData")
-                        }
-                    }
+                    onRcvPacket(packet)
                 } catch (e: IOException) {
                     e.printStackTrace()
+                    break
                 }
 
             }
         })
         .subscribeOn(Schedulers.io())
         .subscribe()
+    }
+
+    /**
+     * 解析收到的数据包
+     */
+    private fun onRcvPacket(packet: AAPacket) {
+        // 过滤掉自己发出的广播包
+        if (isFromMyself(packet)) {
+            return
+        }
+        when (packet.type) {
+            AAPacket.TYPE_SYNC -> {
+                // 1、收到aabillsSync的同步请求
+                Log.Http.d("同步请求：$packet")
+                handleSyncRequest(packet)
+            }
+            AAPacket.TYPE_DATA -> {
+                // 收到账单数据
+                Log.Http.d("局域网账单：$packet")
+                recvBill(packet)
+            }
+            AAPacket.TYPE_USER -> {
+                // 收到局域网用户信息
+                Log.Http.d("局域网用户：$packet")
+                recvUser(packet)
+            }
+            AAPacket.TYPE_SCAN -> {
+                // 收到其他用户的扫描请求，需要把自己的信息发送给对方
+                Log.Http.d("扫描请求：$packet")
+                sendUser(packet, UserManager.user)
+            }
+            else -> {
+                Log.Http.d("不识别的请求：$packet")
+            }
+        }
     }
 
     private fun isFromMyself(packet: AAPacket): Boolean {
@@ -192,15 +255,23 @@ class SyncBillsService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        isRunning = false
         if (mSendTask != null) {
             mSendTask!!.dispose()
         }
         if (mRecvTask != null) {
             mRecvTask!!.dispose()
         }
+        mSendSocket?.close()
+        mRecvSocket?.close()
         mSyncTimer.cancel()
         mTimeOutTimer.cancel()
         mMulticastLock?.release()
+        // 清除个人中心秒数显示
+        RxBus.post(0)
+        // 通知好友列表页面停止扫描动画
+        RxBus.post(StopEvent())
+        Log.Http.d("服务已停止")
     }
 
     /**
@@ -210,6 +281,7 @@ class SyncBillsService : Service() {
         if (packet.orgUid.isEmpty()) {
             return
         }
+
         TaskExecutor.diskIO().execute {
             val user = UserManager.user
             val userDao = BillDatabase.getInstance().userDao()
@@ -223,6 +295,12 @@ class SyncBillsService : Service() {
                 billDao.getNeedSyncBills(syncRecord.mLastSentBillAddTime)
             }
             if (bills.isNotEmpty()) {
+                val sendUsers = userDao.queryOtherUsers(packet.orgUid)
+                if (sendUsers.isNotEmpty()) {
+                    // 把用户信息发送给对方
+                    sendUsers(sendUsers, packet.orgIp, packet.orgUid)
+                }
+
                 sendBills(bills, packet.orgIp, packet.orgUid)
                 // 更新本机的同步记录
                 val bill = bills.first()
@@ -236,31 +314,82 @@ class SyncBillsService : Service() {
         }
     }
 
-    /** 在工作线程处理，可能会阻塞 */
-    private fun sendBills(bills: List<BillRecord>, dstIp: String, dstUid: String) {
+    @WorkerThread
+    private fun sendUsers(users: List<User>, dstIp: String, dstUid: String) {
         val user = UserManager.user
-        bills.forEach {
-            val data = AAPacket.dataPacket(mMyIp, user.mUid)
-            data.dstIp = dstIp
-            data.dstUid = dstUid
-            data.data = JSON.toJSONString(it)
-            Thread.sleep(20)
-            Log.Http.d("账单排队：${JSON.toJSONString(data)}")
-            enqueueData(data, true)
+        users.forEach  {
+            val key = "user_${dstIp}_${it.mUid}"
+            if (!sendRecord.contains(key)) {
+                sendRecord.add(key)
+                val data = AAPacket.userPacket(mMyIp, user.mUid)
+                data.dstIp = dstIp
+                data.dstUid = dstUid
+                data.data = JSON.toJSONString(it)
+                Thread.sleep(10)
+                Log.Http.d("用户排队：${JSON.toJSONString(data)}")
+                enqueueData(data, true)
+            }
         }
     }
 
-    private fun handleBillData(packet: AAPacket) {
+    private fun sendUser(packet: AAPacket, sendUser: User) {
+        val key = "user_${packet.orgIp}_${sendUser.mUid}"
+        // 收到发送用户请求，一定是对方在好友列表也发出了SCAN请求，所以只给对方发送一次是合理的
+        if (sendRecord.contains(key)) {
+            return
+        }
+        sendRecord.add(key)
+
+        val user = UserManager.user
+        val data = AAPacket.userPacket(mMyIp, user.mUid)
+        data.dstIp = packet.orgIp
+        data.dstUid = packet.orgUid
+        data.data = JSON.toJSONString(sendUser)
+        Log.Http.d("用户排队：${JSON.toJSONString(data)}")
+        enqueueData(data, true)
+    }
+
+    /** 在工作线程处理，可能会阻塞 */
+    @WorkerThread
+    private fun sendBills(bills: List<BillRecord>, dstIp: String, dstUid: String) {
+        val user = UserManager.user
+        bills.forEach {
+            val key = "sync_${dstIp}_${it.mId}"
+            if (!sendRecord.contains(key)) {
+                sendRecord.add(key)
+                val data = AAPacket.dataPacket(mMyIp, user.mUid)
+                data.dstIp = dstIp
+                data.dstUid = dstUid
+                data.data = JSON.toJSONString(it)
+                Thread.sleep(10)
+                Log.Http.d("账单排队：${JSON.toJSONString(data)}")
+                enqueueData(data, true)
+            }
+        }
+    }
+
+    private fun recvBill(packet: AAPacket) {
         TaskExecutor.diskIO().execute {
             val billDao = BillDatabase.getInstance().billDao()
             val bill = JSON.parseObject(packet.data, BillRecord::class.java)
             billDao.insertBill(bill)
+        }
+    }
+
+    private fun recvUser(packet: AAPacket) {
+        TaskExecutor.diskIO().execute {
             val userDao = BillDatabase.getInstance().userDao()
-            // 如果是第一次添加该好友的账单，先获取一下该用户的资料
-            val u = userDao.findLocalUser(bill.mUid)
-            if (u == null) {
-                UserManager.addLanUser(bill.mUid)
+            val rcvUser = JSON.parseObject(packet.data, User::class.java)
+            val local = userDao.findLocalUser(rcvUser.mUid)
+            rcvUser.isLastLogin = false
+            // AA设置以本地为准
+            rcvUser.isAaMember = local != null && local.isAaMember
+            userDao.insertUser(rcvUser)
+            if (allowScanUser && RxBus.hasObservers()) {
+                // 通知好友列表页面，扫描到一个局域网用户
+                RxBus.post(packet)
             }
         }
     }
+
 }

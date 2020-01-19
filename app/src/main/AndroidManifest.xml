@@ -19,14 +19,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:icon"
-        tools:ignore="GoogleAppIndexingWarning">
-
-        <!-- Bugly升级 -->
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:icon">
+        <activity android:name=".ui.user.ShareAppActivity"></activity>
+        <activity android:name=".ui.AboutActivity" /> <!-- Bugly升级 -->
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale"
             android:theme="@android:style/Theme.Translucent" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileProvider"
@@ -34,7 +35,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
 
         <activity android:name=".ui.StartupActivity">
@@ -52,9 +53,11 @@
         <activity android:name=".ui.BillsListActivity" />
         <activity android:name=".ui.user.UserLoginActivity" />
         <activity android:name=".ui.user.UserRegActivity" />
+        <activity android:name=".ui.user.FriendListActivity" />
 
-        <service android:name=".SyncBillsService"
-            android:exported="false"/>
+        <service
+            android:name=".SyncBillsService"
+            android:exported="false" />
     </application>
 
 </manifest>

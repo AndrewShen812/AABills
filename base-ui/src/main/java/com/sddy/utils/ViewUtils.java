@@ -10,11 +10,15 @@ import android.support.annotation.DrawableRes;
 import android.support.design.widget.TabLayout;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.sddy.baseui.BaseApplication;
 
@@ -67,6 +71,31 @@ public class ViewUtils {
         SpannableString string = new SpannableString(orgText);
         string.setSpan(new ForegroundColorSpan(res.getColor(colorRes)), start, orgText.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
         return string;
+    }
+
+    public static void setClickableText(TextView textView, String orgText, int start, @ColorRes final int colorRes,
+                                        final boolean showUnderLine, final View.OnClickListener clickListener) {
+        final Resources res = BaseApplication.getInstance().getResources();
+        if (textView == null || TextUtils.isEmpty(orgText) || start >= orgText.length()) {
+            return;
+        }
+        SpannableString string = getColoredText(orgText, start, colorRes);
+        string.setSpan(new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                if (clickListener != null) {
+                    clickListener.onClick(widget);
+                }
+            }
+
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                ds.setColor(res.getColor(colorRes));
+                ds.setUnderlineText(showUnderLine);
+            }
+        }, start, orgText.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        textView.setText(string);
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     public static GradientDrawable getDrawableBg(@ColorRes int colorRes) {

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="presenter"
+            type="com.sddy.baseui.Presenter" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background_color"
+        tools:context=".ui.AboutActivity">
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.25" />
+
+        <ImageView
+            android:id="@+id/iv_about_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{(v)->presenter.onClick(v)}"
+            android:src="@drawable/about_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline" />
+
+        <TextView
+            android:id="@+id/tv_about_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_mid"
+            android:onClick="@{(v)->presenter.onClick(v)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/iv_about_icon"
+            tools:text="AA账单 V1.1.2" />
+
+        <LinearLayout
+            android:id="@+id/ll_about_share"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/common_item_h"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/ripple_white_press_light"
+            android:gravity="center_vertical"
+            android:onClick="@{(v)->presenter.onClick(v)}"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/tv_about_version">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_large"
+                android:layout_weight="1"
+                android:text="分享给好友"
+                android:textColor="@color/text_color_black"
+                android:textSize="@dimen/text_size_default" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_large"
+                android:src="@drawable/icon_item_more" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/view_about_div_line"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/line_gray"
+            app:layout_constraintTop_toBottomOf="@id/ll_about_share" />
+
+        <LinearLayout
+            android:id="@+id/ll_about_github"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/common_item_h"
+            android:background="@drawable/ripple_white_press_light"
+            android:gravity="center_vertical"
+            android:onClick="@{(v)->presenter.onClick(v)}"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/view_about_div_line">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_large"
+                android:layout_weight="1"
+                android:text="GitHub 地址"
+                android:textColor="@color/text_color_black"
+                android:textSize="@dimen/text_size_default" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_large"
+                android:src="@drawable/icon_item_more" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_about_copyright"
+            style="@style/TextDefGray"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_big"
+            android:gravity="center"
+            android:text="这是一个开源的小软件，欢迎和作者交流探讨。"
+            app:layout_constraintBottom_toTopOf="@+id/ll_about_contact"/>
+
+        <LinearLayout
+            android:id="@+id/ll_about_contact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/tv_about_github"
+                style="@style/TextDefMain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_big"
+                android:gravity="center"
+                android:text="GitHub主页" />
+
+            <TextView
+                android:id="@+id/tv_about_email"
+                style="@style/TextDefGray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_large"
+                android:layout_marginBottom="@dimen/margin_large"
+                android:gravity="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="邮箱: shenyong812@hotmail.com" />
+
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/tool_bar_h"
         app:tabIndicatorHeight="@dimen/margin_small"
-        app:tabIndicatorColor="@color/colorAccent"
+        app:tabIndicatorColor="#FF4081"
         app:tabTextColor="@color/white_60"
         app:tabSelectedTextColor="@color/white"
         app:tabGravity="center"

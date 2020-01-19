@@ -49,7 +49,7 @@ object UserManager {
                 userDao.insertUser(user)
             }
         }.subscribe {
-            SyncBillsService.startService()
+            SyncBillsService.startSyncBill()
         }
     }
 
@@ -68,7 +68,7 @@ object UserManager {
                         // TODO 2018/11/27: 是否应该先提示
                         markNoUidBillAsMine()
                         updateOtherUserInfo()
-                        SyncBillsService.startService()
+                        SyncBillsService.startSyncBill()
                     }
                     if (!response.isSuccess() && response.hasMsg()) {
                         MsgToast.shortToast(response.msg)

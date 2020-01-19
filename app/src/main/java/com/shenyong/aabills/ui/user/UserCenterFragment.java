@@ -20,12 +20,12 @@ import com.sddy.utils.TimeUtils;
 import com.sddy.utils.ViewUtils;
 import com.shenyong.aabills.R;
 import com.shenyong.aabills.SyncBillsService;
-import com.shenyong.aabills.UserManager;
 import com.shenyong.aabills.databinding.FragmentUserCenterBinding;
 import com.shenyong.aabills.listdata.AaFriend;
 import com.shenyong.aabills.room.BillDatabase;
 import com.shenyong.aabills.room.User;
 import com.shenyong.aabills.rx.RxExecutor;
+import com.shenyong.aabills.ui.AboutActivity;
 import com.shenyong.aabills.utils.AppUtils;
 import com.shenyong.aabills.utils.RxBus;
 import com.shenyong.aabills.utils.WifiUtils;
@@ -63,6 +63,13 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
     @Override
     protected void onCreatedView(View rootView, Bundle savedInstanceState) {
         setTitle(R.string.title_user_center);
+        setFuncBtnVisible(true);
+        setFuncBtn("关于", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(AboutActivity.class);
+            }
+        });
         setBackBtnVisible(false);
         mViewModel = ViewModelProviders.of(this).get(UserCenterViewModel.class);
         mBinding.setModel(mViewModel);
@@ -83,16 +90,28 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
         mBinding.rvUserCenterFriends.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
     }
 
-    @SuppressLint("CheckResult")
     @Override
     public void onResume() {
         super.onResume();
+        refreshUi();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            refreshUi();
+        }
+    }
+
+    @SuppressLint("CheckResult")
+    private void refreshUi() {
         mBinding.tvUserCenterVersion.setText(getString(R.string.fmt_version, AppUtils.getVersionName(), AppUtils.getVersionCode()));
         mViewModel.loadUserProfile();
         RxExecutor.backgroundWork(new Callable<List<AaFriend>>() {
             @Override
             public List<AaFriend> call() throws Exception {
-                List<User> users = BillDatabase.getInstance().userDao().queryOtherUsers(UserManager.user.mUid);
+                List<User> users = BillDatabase.getInstance().userDao().queryAaUsers();
                 List<AaFriend> items = new ArrayList<>();
                 if (!ArrayUtils.isEmpty(users)) {
                     for (User u : users) {
@@ -132,11 +151,17 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
             case R.id.cv_user_center_sync:
                 syncWlanBills();
                 break;
+            case R.id.cv_user_center_friends:
+                manageFriends();
+                break;
             default:
                 break;
         }
     }
 
+    private void manageFriends() {
+        startActivity(FriendListActivity.class);
+    }
 
     private void setHeadColor() {
         startActivity(HeadSettingActivity.class);
@@ -170,7 +195,23 @@ public class UserCenterFragment extends BaseBindingFragment<FragmentUserCenterBi
             MsgToast.centerToast("请先连上WiFi");
             return;
         }
-        MsgToast.shortToast("正在同步...");
-        SyncBillsService.Companion.startService();
+        RxExecutor.backgroundWork(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                List<User> users = BillDatabase.getInstance().userDao().queryAllUsers();
+                return users.size() > 1;
+            }
+        }).subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean hasFriend) throws Exception {
+                if (hasFriend) {
+                    MsgToast.shortToast("正在同步...");
+                    SyncBillsService.startSyncBill();
+                } else {
+                    MsgToast.centerToast("还没有好友，请先添加好友。");
+                    manageFriends();
+                }
+            }
+        });
     }
 }

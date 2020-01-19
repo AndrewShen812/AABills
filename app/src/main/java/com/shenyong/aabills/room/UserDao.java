@@ -21,8 +21,8 @@ public interface UserDao {
     @Query("update user set isLastLogin = :isLastLogin where mUid = :uid")
     void updateLastLogin(String uid, boolean isLastLogin);
 
-    @Query("select * from user where mUid = :id")
-    User findLocalUser(String id);
+    @Query("select * from user where mUid = :uid")
+    User findLocalUser(String uid);
 
     @Query("select * from user where isLastLogin = 1 limit 1")
     User findLastLoginUser();
@@ -33,6 +33,9 @@ public interface UserDao {
     @Query("select * from user where mUid != :uid")
     List<User> queryOtherUsers(String uid);
 
+    @Query("select * from user where isLastLogin = 0 and isAaMember = 1")
+    List<User> queryAaUsers();
+
     @Query("select * from sync_record where mMyUid = :myUid and mLANUid = :lanUid")
     UserSyncRecord getSyncRecord(String myUid, String lanUid);
 
@@ -41,5 +44,8 @@ public interface UserDao {
 
     @Delete
     void delSyncRecord(UserSyncRecord record);
+
+    @Query("update user set isAaMember = :isAaMember where mUid = :uid")
+    void setAaMember(String uid, boolean isAaMember);
 }
 

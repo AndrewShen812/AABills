@@ -1,25 +1,18 @@
 package com.shenyong.aabills.room;
 
-import android.annotation.SuppressLint;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.google.gson.annotations.SerializedName;
-import com.sddy.baseui.dialog.MsgToast;
-import com.shenyong.aabills.utils.RxUtils;
 
 import java.util.UUID;
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.functions.Consumer;
 
 @Entity(tableName = "user")
 public class User {
@@ -57,11 +50,17 @@ public class User {
     @ColumnInfo
     public boolean isLastLogin;
 
+    @NonNull
+    @ColumnInfo
+    public boolean isAaMember;
+
+    public User() {}
+
     public User(String mName) {
         this.mName = mName;
         mPhone = "";
         mPwd = "";
-        mHeadBg = 0xFF2A82E4;
+        mHeadBg = Color.parseColor("#FF2A82E4");
         isLastLogin = false;
         mUid = UUID.randomUUID().toString();
     }

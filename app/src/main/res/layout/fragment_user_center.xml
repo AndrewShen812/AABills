@@ -179,7 +179,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_large"
                 android:gravity="center_vertical"
-                android:text="同步好友数据" />
+                android:text="开启同步" />
 
             <TextView
                 android:id="@+id/tv_user_center_sync_time"
@@ -202,8 +202,9 @@
             android:layout_marginTop="@dimen/margin_mid"
             android:layout_marginEnd="@dimen/margin_large"
             android:gravity="center_vertical"
+            android:lineSpacingMultiplier="1.2"
             android:paddingEnd="@dimen/margin_large"
-            android:text="扫描局域网内的其他用户，并尝试同步其他用户的数据到本机上。扫描时间1分钟，避免持续运行消耗电量。"
+            android:text="搜索同一 WiFi 下的好友，自己也可以被好友发现，并和搜索到的好友相互同步数据。为节省电量，同步只开启1分钟。"
             app:layout_constraintTop_toBottomOf="@id/cv_user_center_sync"/>
 
         <Button
