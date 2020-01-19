@@ -15,6 +15,8 @@ import com.shenyong.aabills.room.User
 import com.shenyong.aabills.rx.RxExecutor
 import com.shenyong.aabills.sync.AAPacket
 import com.shenyong.aabills.utils.WifiUtils
+import java.util.*
+import kotlin.collections.ArrayList
 
 class FriendListViewModel : ViewModel() {
 
@@ -40,6 +42,16 @@ class FriendListViewModel : ViewModel() {
                 data.nameBg = getBg(it.mHeadBg)
                 data.checked.set(data.isMyself || it.isAaMember)
             }
+            // 自己放在第一个，其余的按字母顺序
+            Collections.sort(innerList, kotlin.Comparator { o1, o2 ->
+                if (o1.isMyself) {
+                    return@Comparator -1
+                }
+                if (o2.isMyself) {
+                    return@Comparator 1
+                }
+                return@Comparator o1.name.compareTo(o2.name)
+            })
             return@backgroundWork  innerList
         }.subscribe {
             friendList.value = innerList

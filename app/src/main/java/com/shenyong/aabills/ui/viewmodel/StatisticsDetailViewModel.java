@@ -7,7 +7,6 @@ import android.arch.lifecycle.ViewModel;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.sddy.utils.ArrayUtils;
 import com.shenyong.aabills.listdata.StatisticTypeData;
 import com.shenyong.aabills.listdata.UserCostData;
 import com.shenyong.aabills.room.BillDatabase;
@@ -78,19 +77,31 @@ public class StatisticsDetailViewModel extends ViewModel {
         });
     }
 
+    /**
+     *
+     * @param bills 所有待统计账单数据
+     * @param excludeUsers 长按设置的不参与AA的用户
+     * @return
+     */
     private StatData calcStatData(List<BillRecord> bills,  Set<String> excludeUsers) {
         Map<String, StatisticTypeData> typesMap = new HashMap<>();
         Map<String, UserCostData> costMap = new HashMap<>();
         double total = 0;
         UserDao userDao = BillDatabase.getInstance().userDao();
         List<User> allUsers = userDao.queryAllUsers();
+        // 不参与AA的成员，可能是在已统计页面长按临时添加的；也可能是在个人中心管理AA好友时设置的，
+        // 这里都需要包含进来。
         for (User u : allUsers) {
+            if (!u.isAaMember && !excludeUsers.contains(u.mUid)) {
+                excludeUsers.add(u.mUid);
+            }
             UserCostData cost = new UserCostData();
             cost.mName = TextUtils.isEmpty(u.mName) ? "佚名" : u.getShortName();
             cost.mUid = u.mUid;
             costMap.put(u.mUid, cost);
         }
         for (BillRecord bill : bills) {
+            // 按消费类型统计
             StatisticTypeData type = typesMap.get(bill.mType);
             if (type == null) {
                 type = new StatisticTypeData();
@@ -101,8 +112,8 @@ public class StatisticsDetailViewModel extends ViewModel {
                 total += bill.mAmount;
                 type.mAmount += bill.mAmount;
             }
-            // 按用户计算
-            UserCostData cost = costMap.get(bill.mUid + "");
+            // 按用户统计
+            UserCostData cost = costMap.get(bill.mUid);
             if (cost == null) {
                 cost = new UserCostData();
                 costMap.put(bill.mUid, cost);
@@ -124,6 +135,15 @@ public class StatisticsDetailViewModel extends ViewModel {
         StatData stat = new StatData();
         stat.mCostData = new ArrayList<>(includeCost);
         stat.mTypesData = new ArrayList<>(typesMap.values());
+        for (StatisticTypeData type : stat.mTypesData) {
+            type.mPercent = type.mAmount / total;
+        }
+        Collections.sort(stat.mTypesData, new Comparator<StatisticTypeData>() {
+            @Override
+            public int compare(StatisticTypeData o1, StatisticTypeData o2) {
+                return (int) (o2.mAmount - o1.mAmount);
+            }
+        });
         // 总金额/均摊人数
         stat.mAvgCost = total / stat.mCostData.size();
         Collections.sort(stat.mCostData, new Comparator<UserCostData>() {
@@ -140,16 +160,6 @@ public class StatisticsDetailViewModel extends ViewModel {
         }
         // 追加不参与统计的用户在最后显示
         stat.mCostData.addAll(excludeCost);
-
-        for (StatisticTypeData type : stat.mTypesData) {
-            type.mPercent = type.mAmount / total;
-        }
-        Collections.sort(stat.mTypesData, new Comparator<StatisticTypeData>() {
-            @Override
-            public int compare(StatisticTypeData o1, StatisticTypeData o2) {
-                return (int) (o2.mAmount - o1.mAmount);
-            }
-        });
         return stat;
     }
 }

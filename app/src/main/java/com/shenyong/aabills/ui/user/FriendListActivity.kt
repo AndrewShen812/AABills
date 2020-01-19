@@ -9,13 +9,13 @@ import android.support.v7.widget.RecyclerView
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.view.View
 import com.sddy.baseui.BaseActivity
 import com.sddy.baseui.dialog.MsgToast
 import com.sddy.baseui.recycler.databinding.SimpleBindingAdapter
-import com.sddy.utils.ViewUtils
 import com.shenyong.aabills.R
 import com.shenyong.aabills.SyncBillsService
 import com.shenyong.aabills.listdata.FriendListData
@@ -75,12 +75,15 @@ class FriendListActivity : BaseActivity() {
             viewModel.addScanUser(it)
         })
         stopEvent = RxBus.register(StopEvent::class.java, Consumer {
+            if (!stopServiceWhenFinish) {
+                // 进入页面时已打开同步服务，但运行完一次了，在本页面再次启动的服务要在离开时停止
+                stopServiceWhenFinish = true
+            }
             // 提示引导安装应用
             if (scanCnt == 0) {
                 pb_scan.visibility = View.GONE
-                val tips = resources.getString(R.string.scan_help)
-                val text = SpannableStringBuilder("未搜索到好友？\n提醒好友")
-                val installText = SpannableString("安装AA账单")
+                val text = SpannableStringBuilder("未搜索到好友？\n提醒好友连接到同一WiFi，打开")
+                val installText = SpannableString("AA账单")
                 val clickSpan = object : ClickableSpan() {
                     override fun onClick(widget: View) {
                         showShareDialog()
@@ -90,8 +93,9 @@ class FriendListActivity : BaseActivity() {
                 installText.setSpan(clickSpan, 0, installText.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
                 installText.setSpan(colorSpan, 0, installText.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
                 text.append(installText)
-                text.append("、连接到同一WiFi并开启同步。")
-                tv_scan_desc.text = tips
+                text.append("并开启同步。")
+                tv_scan_desc.text = text
+                tv_scan_desc.movementMethod = LinkMovementMethod.getInstance()
 //                tv_scan_desc.setText(R.string.scan_help)
                 tv_scan_again.visibility = View.VISIBLE
             } else {
@@ -110,11 +114,7 @@ class FriendListActivity : BaseActivity() {
     }
 
     private fun showShareDialog() {
-        ShareUtils.showShareDialog(this, object : ShareUtils.ShareListener {
-            override fun onCopyUrl(url: String) {
-                //sendText(url)
-            }
-        })
+        ShareUtils.showShareDialog(this)
     }
 
     private fun startScan() {

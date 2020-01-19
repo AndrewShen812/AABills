@@ -37,7 +37,7 @@ public abstract class BillDatabase extends RoomDatabase {
     private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE user ADD isAaMember INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE user ADD isAaMember INTEGER NOT NULL DEFAULT 1");
         }
     };
 }

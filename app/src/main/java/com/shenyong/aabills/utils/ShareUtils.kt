@@ -3,6 +3,7 @@ package com.shenyong.aabills.utils
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
@@ -12,6 +13,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
 import com.sddy.baseui.BaseBindingActivity
+import com.sddy.baseui.dialog.MsgToast
 import com.sddy.utils.log.Log
 import com.shenyong.aabills.AABilsApp
 import com.shenyong.aabills.R
@@ -148,7 +150,7 @@ object ShareUtils {
     }
 
     @SuppressLint("CheckResult")
-    fun showShareDialog(context: Context, shareListener: ShareListener?) {
+    fun showShareDialog(context: Context) {
         val view = LayoutInflater.from(context).inflate(R.layout.layout_share_dialog, null, false)
         val ivQr = view.findViewById<ImageView>(R.id.iv_share_qr)
         val btnSend = view.findViewById<Button>(R.id.btn_share_send)
@@ -164,12 +166,20 @@ object ShareUtils {
                 .setView(view)
                 .create()
         btnSend.setOnClickListener {
-            shareListener?.onCopyUrl(url)
+            dialog.dismiss()
+            sendText(context, url)
         }
         dialog.show()
     }
 
-    interface ShareListener {
-        fun onCopyUrl(url: String)
+    private fun sendText(context: Context, url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.putExtra(Intent.EXTRA_TEXT, url)
+            intent.type = "text/plain"
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            MsgToast.centerToast("抱歉，发送失败")
+        }
     }
 }

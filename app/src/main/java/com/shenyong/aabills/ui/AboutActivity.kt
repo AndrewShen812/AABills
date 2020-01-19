@@ -1,6 +1,5 @@
 package com.shenyong.aabills.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -44,11 +43,7 @@ class AboutActivity : BaseBindingActivity<ActivityAboutBinding>() {
     }
 
     private fun shareApp() {
-        ShareUtils.showShareDialog(this, object : ShareUtils.ShareListener {
-            override fun onCopyUrl(url: String) {
-                sendText(url)
-            }
-        })
+        ShareUtils.showShareDialog(this)
     }
 
     private fun opneGitHubPage() {
@@ -58,17 +53,6 @@ class AboutActivity : BaseBindingActivity<ActivityAboutBinding>() {
             startActivity(intent)
         } catch (e: Exception) {
             MsgToast.centerToast("抱歉，无法在你的设备上打开页面")
-        }
-    }
-
-    private fun sendText(url: String) {
-        try {
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.putExtra(Intent.EXTRA_TEXT, url)
-            intent.type = "text/plain"
-            startActivity(intent)
-        } catch (e: Exception) {
-            MsgToast.centerToast("抱歉，发送失败")
         }
     }
 

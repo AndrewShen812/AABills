@@ -46,6 +46,7 @@ object UserManager {
                 // 新安装使用的用户，添加到数据库
                 user.isLogin = true
                 user.isLastLogin = true
+                user.isAaMember = true
                 userDao.insertUser(user)
             }
         }.subscribe {
