@@ -31,17 +31,15 @@ import com.shenyong.aabills.listdata.BillTypeData;
 import com.shenyong.aabills.room.BillDatabase;
 import com.shenyong.aabills.room.BillRecord;
 import com.shenyong.aabills.room.User;
+import com.shenyong.aabills.rx.RxExecutor;
 import com.shenyong.aabills.ui.viewmodel.AddBillsViewModel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-import io.reactivex.Emitter;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding>
         implements IItemClickLisntener<BaseHolderData> {
@@ -219,22 +217,19 @@ public class AddBillsFragment extends BaseBindingFragment<FragmentAddBillBinding
         if (user.isLogin && !TextUtils.isEmpty(user.mUid)) {
             mBill.mUid = user.mUid;
         }
-        Observable.generate(new Consumer<Emitter<String>>() {
-                    @Override
-                    public void accept(Emitter<String> emitter) {
-                        try {
-                            mBill.generateId();
-                            BillDatabase.getInstance().billDao().insertBill(mBill);
-                            emitter.onNext("OK");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            emitter.onNext("FAIL");
-                        }
-                        emitter.onComplete();
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        RxExecutor.backgroundWork(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                try {
+                    mBill.generateId();
+                    BillDatabase.getInstance().billDao().insertBill(mBill);
+                    return "OK";
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return "FAIL";
+            }
+        })
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String billRecord) throws Exception {

@@ -19,7 +19,7 @@ public class StartupActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_startup);
         showFullScreen();
-        UserManager.INSTANCE.autoLogin();
+        UserManager.autoLogin();
         TextView tvVersion = findViewById(R.id.tv_start_up_version);
         tvVersion.setText(getString(R.string.fmt_version, AppUtils.getVersionName(), AppUtils.getVersionCode()));
     }

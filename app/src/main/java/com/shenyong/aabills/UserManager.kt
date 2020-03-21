@@ -31,17 +31,17 @@ import io.reactivex.schedulers.Schedulers
 object UserManager {
 
     @JvmField
-    var  user = User(Build.MODEL)
+    var user = User(Build.MODEL)
 
+    @JvmStatic
     fun autoLogin() {
         RxExecutor.backgroundWork {
             val userDao = BillDatabase.getInstance().userDao()
             val localUser = userDao.findLastLoginUser()
+            Log.Db.d("localUser:${localUser}")
             if (localUser != null) {
                 user = localUser
                 user.isLogin = true
-                // 2020年1月14日 fixbug: 修复已存在记录因账单所属用户Uid为空显示“佚名”问题
-                markNoUidBillAsMine()
             } else {
                 // 新安装使用的用户，添加到数据库
                 user.isLogin = true

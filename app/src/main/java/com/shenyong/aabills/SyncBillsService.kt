@@ -90,6 +90,7 @@ class SyncBillsService : Service() {
     }
 
     private fun enqueueData(packet: AAPacket, blocking: Boolean) {
+        // TODO 2020-01-20: 发送数据前加密
         val data = "${PACK_PREFIX}_${packet.toJSONString()}".toByteArray()
         if (blocking) {
             mSendQueue.put(data)
@@ -381,7 +382,8 @@ class SyncBillsService : Service() {
             val userDao = BillDatabase.getInstance().userDao()
             val rcvUser = JSON.parseObject(packet.data, User::class.java)
             val local = userDao.findLocalUser(rcvUser.mUid)
-            rcvUser.isLastLogin = false
+            // 是否上次登录信息以本地为准
+            rcvUser.isLastLogin = local != null && local.isLastLogin
             // AA设置以本地为准
             rcvUser.isAaMember = local != null && local.isAaMember
             userDao.insertUser(rcvUser)
